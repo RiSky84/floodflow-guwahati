@@ -1,0 +1,2870 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  font-family: Inter, Arial, sans-serif;
+  color: #17212b;
+  background: #eef2f4;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 1100px;
+  overflow: hidden;
+  background: #eef2f4;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-shell {
+  width: 100%;
+  height: 100vh;
+
+  display: grid;
+
+  grid-template-columns:
+    76px minmax(0, 1fr) 350px;
+
+  grid-template-rows:
+    64px minmax(0, 1fr) 42px;
+
+  background: #eef2f4;
+}
+
+
+/* ---------------- HEADER ---------------- */
+
+.topbar {
+  grid-column: 1 / -1;
+  grid-row: 1;
+
+  display: grid;
+
+  grid-template-columns:
+    310px minmax(320px, 560px) 1fr;
+
+  align-items: center;
+  gap: 24px;
+
+  padding: 0 20px 0 14px;
+
+  background: #ffffff;
+
+  border-bottom:
+    1px solid #d9e0e4;
+
+  z-index: 2000;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark {
+  width: 36px;
+  height: 36px;
+
+  display: grid;
+  place-items: center;
+
+  background: #0c2830;
+  color: #ffffff;
+
+  font-size: 17px;
+  font-weight: 700;
+
+  border-radius: 6px;
+}
+
+.brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand-copy strong {
+  color: #111c23;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+}
+
+.brand-copy span {
+  color: #74808a;
+  font-size: 11px;
+}
+
+
+/* ---------------- SEARCH ---------------- */
+
+.locality-search {
+  height: 38px;
+
+  display: grid;
+
+  grid-template-columns:
+    28px minmax(0, 1fr) auto;
+
+  align-items: center;
+
+  border:
+    1px solid #cfd8dd;
+
+  background: #f8fafb;
+}
+
+.search-icon {
+  text-align: center;
+  color: #65737d;
+}
+
+.locality-search input {
+  min-width: 0;
+  height: 100%;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+  color: #17212b;
+}
+
+.locality-search button {
+  height: 100%;
+
+  padding: 0 16px;
+
+  border: 0;
+
+  border-left:
+    1px solid #cfd8dd;
+
+  background: #ffffff;
+  color: #1a4e5a;
+
+  font-weight: 600;
+}
+
+
+/* ---------------- LIVE STATUS ---------------- */
+
+.topbar-status {
+  display: flex;
+
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 8px;
+
+  color: #52616b;
+
+  font-size: 11px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.05em;
+}
+
+.source-pill,
+.model-tag {
+  display: inline-flex;
+  align-items: center;
+
+  min-height: 20px;
+
+  padding: 0 7px;
+
+  border:
+    1px solid #bfd0d5;
+
+  background: #eef5f6;
+  color: #285b64;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #2f855a;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(47, 133, 90, 0.12);
+}
+
+
+/* ---------------- NAVIGATION ---------------- */
+
+.nav-rail {
+  grid-column: 1;
+  grid-row: 2;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content:
+    space-between;
+
+  padding: 12px 8px;
+
+  background: #0c1f27;
+
+  border-right:
+    1px solid #17313a;
+
+  z-index: 1500;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.rail-item,
+.rail-report {
+  width: 100%;
+
+  border: 0;
+
+  color: #9eb0b7;
+
+  background:
+    transparent;
+}
+
+.rail-item {
+  min-height: 58px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  font-size: 9px;
+
+  letter-spacing: 0.04em;
+
+  text-transform: uppercase;
+
+  border-left:
+    2px solid transparent;
+}
+
+.rail-item:hover,
+.rail-item.selected {
+  color: #e3eef1;
+  background: #112b34;
+}
+
+.rail-item.active {
+  color: #ffffff;
+
+  border-left-color:
+    #63a6b4;
+
+  background: #13313a;
+}
+
+.rail-icon {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.rail-report {
+  min-height: 54px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 3px;
+
+  background: #dfecee;
+  color: #163842;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.rail-report span {
+  font-size: 21px;
+  line-height: 1;
+}
+
+
+/* ---------------- MAP ---------------- */
+
+.map-stage {
+  position: relative;
+
+  grid-column: 2;
+  grid-row: 2;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow: hidden;
+
+  background: #dce4e7;
+}
+
+.main-map,
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+}
+
+.leaflet-control-zoom {
+  border:
+    1px solid #bcc8cd !important;
+
+  border-radius:
+    0 !important;
+
+  box-shadow:
+    none !important;
+}
+
+.leaflet-control-zoom a {
+  color:
+    #31444c !important;
+
+  background:
+    #ffffff !important;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  border-radius: 2px;
+
+  box-shadow:
+    0 5px 18px
+    rgba(11, 31, 39, 0.18);
+}
+
+.map-popup {
+  min-width: 150px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+
+  color: #2a3840;
+}
+
+.map-popup strong {
+  color: #101b21;
+}
+
+
+/* ---------------- MAP TITLE ---------------- */
+
+.map-title-block {
+  position: absolute;
+
+  top: 18px;
+  left: 18px;
+
+  z-index: 1000;
+
+  width: 350px;
+
+  padding: 13px 15px;
+
+  background:
+    rgba(255, 255, 255, 0.95);
+
+  border-left:
+    3px solid #285b64;
+
+  box-shadow:
+    0 3px 12px
+    rgba(26, 52, 61, 0.08);
+}
+
+.eyebrow {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #6e7c85;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+}
+
+.map-title-block h1 {
+  margin: 0;
+
+  color: #18242b;
+
+  font-size: 18px;
+
+  letter-spacing: -0.03em;
+}
+
+.map-title-block p {
+  margin: 5px 0 0;
+
+  color: #68757d;
+
+  font-size: 11px;
+
+  line-height: 1.45;
+}
+
+
+/* ---------------- LAYER CONTROL ---------------- */
+
+.layer-panel {
+  position: absolute;
+
+  top: 18px;
+  right: 18px;
+
+  z-index: 1000;
+
+  width: 184px;
+
+  padding: 12px;
+
+  background:
+    rgba(255, 255, 255, 0.96);
+
+  border:
+    1px solid #d2dade;
+
+  box-shadow:
+    0 3px 12px
+    rgba(26, 52, 61, 0.08);
+}
+
+.layer-panel label {
+  min-height: 31px;
+
+  display: grid;
+
+  grid-template-columns:
+    18px minmax(0, 1fr) auto;
+
+  align-items: center;
+
+  gap: 6px;
+
+  color: #34434b;
+
+  font-size: 11px;
+}
+
+.layer-panel input {
+  accent-color: #285b64;
+}
+
+.layer-panel small {
+  color: #9aa5ab;
+
+  font-size: 9px;
+
+  text-transform: uppercase;
+}
+
+.disabled-layer {
+  opacity: 0.55;
+}
+
+
+/* ---------------- MAP LEGEND ---------------- */
+
+.map-legend {
+  position: absolute;
+
+  left: 18px;
+  bottom: 18px;
+
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 9px 11px;
+
+  background:
+    rgba(255, 255, 255, 0.94);
+
+  border:
+    1px solid #d2dade;
+
+  color: #4e5c64;
+
+  font-size: 10px;
+}
+
+.map-legend span {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+
+  white-space: nowrap;
+}
+
+.legend-swatch {
+  width: 8px;
+  height: 8px;
+
+  display: inline-block;
+
+  border-radius: 50%;
+}
+
+.legend-swatch.low {
+  background: #2f7b58;
+}
+
+.legend-swatch.medium {
+  background: #c79a1b;
+}
+
+.legend-swatch.high {
+  background: #d76b26;
+}
+
+.legend-swatch.very-high {
+  background: #b63a34;
+}
+
+.legend-swatch.report {
+  background: #287c95;
+}
+
+
+/* ---------------- RIGHT PANEL ---------------- */
+
+.intel-panel {
+  grid-column: 3;
+  grid-row: 2;
+
+  min-height: 0;
+
+  overflow-y: auto;
+
+  padding:
+    18px 18px 24px;
+
+  background: #ffffff;
+
+  border-left:
+    1px solid #d5dde1;
+}
+
+.panel-heading {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content:
+    space-between;
+
+  gap: 12px;
+
+  padding-bottom: 16px;
+
+  border-bottom:
+    1px solid #e1e6e9;
+}
+
+.panel-heading h2 {
+  margin: 0;
+
+  color: #152128;
+
+  font-size: 23px;
+
+  letter-spacing: -0.04em;
+}
+
+.panel-report-button {
+  padding: 7px 9px;
+
+  border:
+    1px solid #c5d0d5;
+
+  background: #ffffff;
+
+  color: #2e626b;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+
+/* ---------------- RISK ---------------- */
+
+.risk-hero {
+  display: flex;
+
+  align-items: flex-end;
+
+  justify-content:
+    space-between;
+
+  padding: 20px 0 10px;
+}
+
+.risk-hero strong {
+  color: #17242b;
+
+  font-size: 48px;
+  font-weight: 600;
+
+  letter-spacing: -0.06em;
+}
+
+.risk-hero small {
+  margin-left: 4px;
+
+  color: #7b878e;
+
+  font-size: 14px;
+}
+
+.risk-label {
+  margin-bottom: 8px;
+
+  padding: 5px 8px;
+
+  border:
+    1px solid;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.source-note {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding-bottom: 17px;
+
+  color: #76838b;
+
+  font-size: 10px;
+
+  border-bottom:
+    1px solid #e1e6e9;
+}
+
+
+/* ---------------- PANEL SECTIONS ---------------- */
+
+.panel-section {
+  padding: 17px 0;
+
+  border-bottom:
+    1px solid #e1e6e9;
+}
+
+.panel-section h3 {
+  margin: 0 0 11px;
+
+  color: #24323a;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.05em;
+}
+
+.section-title {
+  display: flex;
+
+  align-items: center;
+
+  justify-content:
+    space-between;
+
+  gap: 10px;
+}
+
+.section-title > span:not(.model-tag) {
+  color: #849097;
+
+  font-size: 9px;
+}
+
+
+/* ---------------- METRICS ---------------- */
+
+.metric-grid {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  border-top:
+    1px solid #e5eaec;
+
+  border-left:
+    1px solid #e5eaec;
+}
+
+.metric-grid > div {
+  min-height: 67px;
+
+  padding: 10px;
+
+  border-right:
+    1px solid #e5eaec;
+
+  border-bottom:
+    1px solid #e5eaec;
+}
+
+.metric-grid span {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #78858d;
+
+  font-size: 10px;
+}
+
+.metric-grid strong {
+  color: #1c2a31;
+
+  font-size: 16px;
+  font-weight: 600;
+}
+
+
+/* ---------------- DETAILS ---------------- */
+
+.detail-list {
+  margin: 0;
+}
+
+.detail-list > div {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content:
+    space-between;
+
+  gap: 18px;
+
+  padding: 9px 0;
+}
+
+.detail-list dt {
+  color: #78858d;
+
+  font-size: 10px;
+}
+
+.detail-list dd {
+  margin: 0;
+
+  color: #25343b;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  text-align: right;
+}
+
+
+/* ---------------- RIVER ---------------- */
+
+.river-readout strong {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #17303a;
+
+  font-size: 18px;
+}
+
+.river-readout span {
+  color: #7c888e;
+
+  font-size: 9px;
+
+  line-height: 1.45;
+}
+
+
+/* ---------------- RISK FACTORS ---------------- */
+
+.factor-list {
+  margin: 0;
+
+  padding: 0;
+
+  list-style: none;
+}
+
+.factor-list li {
+  position: relative;
+
+  padding:
+    7px 0 7px 15px;
+
+  color: #56656d;
+
+  font-size: 10px;
+
+  line-height: 1.4;
+}
+
+.factor-list li::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 12px;
+
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: #c28a39;
+}
+
+.primary-action {
+  width: 100%;
+  min-height: 43px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content:
+    space-between;
+
+  margin-top: 18px;
+
+  padding: 0 13px;
+
+  border: 0;
+
+  background: #143640;
+  color: #ffffff;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+/* ---------------- BOTTOM LIVE BAR ---------------- */
+
+.status-strip {
+  grid-column: 1 / -1;
+  grid-row: 3;
+
+  display: flex;
+
+  align-items: stretch;
+
+  background: #f8fafb;
+
+  border-top:
+    1px solid #ced7db;
+
+  z-index: 1600;
+}
+
+.status-live,
+.status-item {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 0 14px;
+
+  border-right:
+    1px solid #dce3e6;
+
+  font-size: 9px;
+
+  white-space: nowrap;
+}
+
+.status-live {
+  width: 76px;
+
+  justify-content: center;
+
+  padding: 0;
+
+  color: #2f6e50;
+
+  font-weight: 700;
+}
+
+.status-item span {
+  color: #7a878e;
+}
+
+.status-item strong {
+  color: #2a3840;
+
+  font-size: 10px;
+}
+
+.status-item.warning strong {
+  color: #b9572d;
+}
+
+
+/* ---------------- REPORT MODAL ---------------- */
+
+.modal-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 5000;
+
+  display: grid;
+  place-items: center;
+
+  padding: 24px;
+
+  background:
+    rgba(10, 22, 28, 0.62);
+}
+
+.report-modal {
+  width:
+    min(520px, 94vw);
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  padding: 22px;
+
+  background: #ffffff;
+  color: #1b272e;
+
+  border-top:
+    4px solid #285b64;
+
+  box-shadow:
+    0 24px 80px
+    rgba(10, 24, 31, 0.3);
+}
+
+.modal-header {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content:
+    space-between;
+
+  gap: 16px;
+}
+
+.modal-header h2 {
+  margin: 0;
+
+  font-size: 23px;
+
+  letter-spacing: -0.04em;
+}
+
+.close-btn {
+  border: 0;
+
+  background: transparent;
+
+  color: #69777f;
+
+  font-size: 26px;
+
+  line-height: 1;
+}
+
+.modal-intro {
+  margin: 10px 0 16px;
+
+  color: #748189;
+
+  font-size: 11px;
+
+  line-height: 1.5;
+}
+
+.gps-btn {
+  width: 100%;
+  min-height: 40px;
+
+  margin-bottom: 14px;
+
+  border:
+    1px solid #aac0c6;
+
+  background: #eef5f6;
+  color: #285b64;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.report-modal label {
+  display: block;
+
+  color: #52616a;
+
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.report-modal input,
+.report-modal select,
+.report-modal textarea {
+  width: 100%;
+
+  margin-top: 5px;
+
+  padding: 10px 11px;
+
+  border:
+    1px solid #cad4d8;
+
+  border-radius: 0;
+
+  outline: none;
+
+  background: #fbfcfc;
+  color: #1e2b32;
+}
+
+.report-modal input:focus,
+.report-modal select:focus,
+.report-modal textarea:focus {
+  border-color: #5b8c96;
+
+  background: #ffffff;
+}
+
+.report-modal > label {
+  margin-top: 13px;
+}
+
+.field-row {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 12px;
+
+  margin-top: 13px;
+}
+
+.form-message {
+  margin-top: 14px;
+
+  padding: 10px;
+
+  border-left:
+    3px solid #4a7b85;
+
+  background: #edf4f5;
+  color: #3d626a;
+
+  font-size: 10px;
+}
+
+.submit-report {
+  width: 100%;
+  min-height: 43px;
+
+  margin-top: 16px;
+
+  border: 0;
+
+  background: #143640;
+  color: #ffffff;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+/* ---------------- SMALLER DESKTOP ---------------- */
+
+@media (max-width: 1250px) {
+  body {
+    min-width: 1024px;
+  }
+
+  .app-shell {
+    grid-template-columns:
+      68px minmax(0, 1fr) 320px;
+  }
+
+  .topbar {
+    grid-template-columns:
+      260px minmax(280px, 470px) 1fr;
+  }
+
+  .map-title-block {
+    width: 310px;
+  }
+}
+
+
+/* =========================================================
+   STEP 1.1 — SCREENSHOT POLISH
+   ========================================================= */
+
+/* Keep the selected locality + risk visible while scrolling details. */
+.intel-summary {
+  position: sticky;
+  top: -18px;
+  z-index: 20;
+  margin: -18px -18px 0;
+  padding: 18px 18px 0;
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom: 1px solid #e1e6e9;
+}
+
+/* Avoid a double border inside the sticky summary. */
+.intel-summary .source-note {
+  border-bottom: 0;
+}
+
+/* Make the right panel feel less like a long form. */
+.intel-panel {
+  scrollbar-width: thin;
+  scrollbar-color: #aebbc1 #eef2f4;
+}
+
+.intel-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.intel-panel::-webkit-scrollbar-track {
+  background: #eef2f4;
+}
+
+.intel-panel::-webkit-scrollbar-thumb {
+  background: #aebbc1;
+}
+
+/* Smaller overlays = more usable map area. */
+.map-title-block {
+  width: 300px;
+  padding: 10px 12px;
+}
+
+.map-title-block h1 {
+  font-size: 16px;
+}
+
+.map-title-block p {
+  margin-top: 3px;
+  font-size: 10px;
+}
+
+.layer-panel {
+  width: 172px;
+  padding: 10px;
+}
+
+.layer-panel label {
+  min-height: 28px;
+}
+
+/* Search should feel like a control, not a giant hero field. */
+.topbar {
+  grid-template-columns: 300px minmax(300px, 500px) 1fr;
+}
+
+.locality-search {
+  max-width: 500px;
+}
+
+/* Slightly quieter bottom status bar. */
+.status-strip {
+  background: #ffffff;
+}
+
+.status-item {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* Stronger distinction between operational nav and content. */
+.nav-rail {
+  background: #0a222a;
+}
+
+/* Selected map point is easier to notice without neon/glow. */
+.leaflet-interactive:focus {
+  outline: none;
+}
+
+
+/* =========================================================
+   STEP 2 — LIVE RAIN RADAR
+   ========================================================= */
+
+.radar-live-label {
+  color: #2f7b58 !important;
+  font-weight: 700;
+}
+
+.radar-feed-status {
+  margin-top: 7px;
+  padding-top: 8px;
+  border-top: 1px solid #e1e7ea;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.radar-feed-status span {
+  color: #6c7981;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.radar-feed-status small {
+  color: #8f9aa0;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.feed-ok {
+  color: #2f7b58 !important;
+}
+
+.feed-offline {
+  color: #a76536 !important;
+}
+
+/* Keep radar below markers/popups but above the base map. */
+.leaflet-pane.leaflet-tile-pane {
+  z-index: 200;
+}
+
+.leaflet-pane.leaflet-overlay-pane {
+  z-index: 400;
+}
+
+
+/* =========================================================
+   STEP 3 — RISK-AWARE SAFE ROUTING
+   ========================================================= */
+
+.intel-summary {
+  top: 0;
+  background: #ffffff;
+}
+
+.route-panel-content {
+  min-height: 100%;
+}
+
+.route-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 10px 0 14px;
+  border-bottom: 1px solid #e1e6e9;
+  color: #6b7880;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.route-field {
+  display: block;
+  margin-top: 13px;
+  color: #65737b;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.route-field select {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid #cbd5d9;
+  border-radius: 0;
+  outline: none;
+  background: #fbfcfc;
+  color: #203038;
+  font-size: 11px;
+}
+
+.route-field select:focus {
+  border-color: #5f8b94;
+  background: #ffffff;
+}
+
+.gps-route-state {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.gps-route-state button {
+  padding: 7px 9px;
+  border: 1px solid #a9bec4;
+  background: #edf4f5;
+  color: #275b65;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.gps-route-state span {
+  overflow: hidden;
+  color: #7a878d;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.route-calculate {
+  width: 100%;
+  min-height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding: 0 13px;
+  border: 0;
+  background: #143f49;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.route-calculate:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.route-message {
+  margin-top: 10px;
+  padding: 9px 10px;
+  border-left: 3px solid #7b9ba2;
+  background: #f1f6f7;
+  color: #5b6d74;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.route-result-hero {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid #e2e7ea;
+  border-left: 1px solid #e2e7ea;
+}
+
+.route-result-hero > div {
+  min-height: 72px;
+  padding: 10px;
+  border-right: 1px solid #e2e7ea;
+  border-bottom: 1px solid #e2e7ea;
+}
+
+.route-result-hero strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #17282f;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+.route-result-hero span {
+  color: #7b878e;
+  font-size: 9px;
+}
+
+.route-safety-summary {
+  margin-top: 10px;
+}
+
+.route-safety-summary > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  color: #68767d;
+  font-size: 9px;
+}
+
+.route-safety-summary strong {
+  color: #22343c;
+  font-size: 11px;
+}
+
+.route-alternatives {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.route-alternatives button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 10px;
+  padding: 9px 10px;
+  border: 1px solid #d6dee1;
+  background: #ffffff;
+  color: #35454c;
+  text-align: left;
+}
+
+.route-alternatives button.active {
+  border-color: #5f8992;
+  background: #edf4f5;
+}
+
+.route-alternatives span {
+  font-size: 9px;
+  color: #68767d;
+}
+
+.route-alternatives strong {
+  font-size: 11px;
+}
+
+.route-alternatives small {
+  grid-column: 1 / -1;
+  color: #849097;
+  font-size: 8px;
+}
+
+.route-source-note {
+  margin-top: 16px;
+  padding: 10px;
+  border: 1px solid #dde4e7;
+  background: #fafbfb;
+  color: #7b878e;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   STEP 4 — OSM DRAINAGE NETWORK
+   ========================================================= */
+
+.drainage-live-label {
+  color: #1d7f91 !important;
+  font-weight: 700;
+}
+
+.drainage-feed-status {
+  margin-top: 7px;
+  padding-top: 8px;
+  border-top: 1px solid #e1e7ea;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.drainage-feed-status span {
+  color: #6c7981;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.drainage-feed-status small {
+  color: #8f9aa0;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.legend-line {
+  width: 14px;
+  height: 0;
+  display: inline-block;
+  border-top: 2px solid;
+}
+
+.legend-line.drainage {
+  border-color: #1d7f91;
+}
+
+.context-source-note {
+  margin-top: 8px;
+  padding: 8px 9px;
+  border-left: 2px solid #8fb3ba;
+  background: #f5f9fa;
+  color: #7b878d;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.drainage-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid #e3e8ea;
+  border-left: 1px solid #e3e8ea;
+}
+
+.drainage-summary-grid > div {
+  min-height: 60px;
+  padding: 9px;
+  border-right: 1px solid #e3e8ea;
+  border-bottom: 1px solid #e3e8ea;
+}
+
+.drainage-summary-grid span {
+  display: block;
+  margin-bottom: 7px;
+  color: #7b878d;
+  font-size: 9px;
+}
+
+.drainage-summary-grid strong {
+  color: #17333d;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.drainage-explainer {
+  margin: 9px 0 0;
+  color: #7b878d;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.secondary-map-action {
+  width: 100%;
+  min-height: 34px;
+  margin-top: 10px;
+  border: 1px solid #b7c8cd;
+  background: #f5f9fa;
+  color: #285c66;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.secondary-map-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   STEP 5 — DRAINAGE INTELLIGENCE
+   ========================================================= */
+
+.drainage-intel-panel {
+  min-height: 100%;
+}
+
+.drainage-mode-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 0 14px;
+  border-bottom: 1px solid #e1e6e9;
+  color: #6f7d84;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.drainage-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid #e2e8ea;
+  border-left: 1px solid #e2e8ea;
+}
+
+.drainage-kpi-grid > div,
+.asset-overview-grid > div {
+  min-height: 68px;
+  padding: 9px;
+  border-right: 1px solid #e2e8ea;
+  border-bottom: 1px solid #e2e8ea;
+}
+
+.drainage-kpi-grid span,
+.asset-overview-grid span {
+  display: block;
+  margin-bottom: 7px;
+  color: #7b878e;
+  font-size: 8px;
+  line-height: 1.35;
+}
+
+.drainage-kpi-grid strong,
+.asset-overview-grid strong {
+  color: #18323b;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.asset-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 14px;
+  border-top: 1px solid #e2e8ea;
+  border-left: 1px solid #e2e8ea;
+}
+
+.data-quality-box {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 9px;
+  padding: 9px 10px;
+  border-left: 3px solid #719aa3;
+  background: #f3f7f8;
+}
+
+.data-quality-box.warning {
+  border-left-color: #c08b35;
+  background: #fbf8f1;
+}
+
+.data-quality-box strong {
+  color: #33474f;
+  font-size: 9px;
+}
+
+.data-quality-box span {
+  color: #76838a;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.related-assets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.asset-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.asset-filters button {
+  min-height: 27px;
+  padding: 0 8px;
+  border: 1px solid #ccd6da;
+  background: #ffffff;
+  color: #66747c;
+  font-size: 8px;
+  font-weight: 600;
+}
+
+.asset-filters button.active {
+  border-color: #527f88;
+  background: #edf4f5;
+  color: #285b64;
+}
+
+.asset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.asset-card {
+  padding: 10px;
+  border: 1px solid #dfe5e7;
+  background: #fbfcfc;
+}
+
+.asset-card.compact {
+  padding: 8px 9px;
+}
+
+.asset-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.asset-card-heading strong {
+  color: #25363d;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.asset-card-heading span {
+  flex: 0 0 auto;
+  padding: 2px 5px;
+  border: 1px solid #c8d6da;
+  background: #eef5f6;
+  color: #35656e;
+  font-size: 7px;
+  font-weight: 700;
+}
+
+.asset-card p {
+  margin: 5px 0;
+  color: #748188;
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+.asset-card > small {
+  color: #849097;
+  font-size: 7px;
+  line-height: 1.4;
+}
+
+.asset-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 7px;
+}
+
+.asset-meta span {
+  padding: 3px 5px;
+  background: #f0f3f4;
+  color: #65747b;
+  font-size: 7px;
+}
+
+.asset-status-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.asset-status {
+  font-size: 7px;
+  line-height: 1.35;
+}
+
+.asset-status.completed {
+  color: #2f7955;
+}
+
+.asset-status.ongoing {
+  color: #a66f25;
+}
+
+.asset-status.published {
+  color: #6e7b82;
+}
+
+.asset-status-row small {
+  color: #68767d;
+  font-size: 7px;
+  white-space: nowrap;
+}
+
+.data-gap-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.data-gap-list li {
+  position: relative;
+  padding: 6px 0 6px 14px;
+  color: #67757c;
+  font-size: 9px;
+}
+
+.data-gap-list li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: #b06f36;
+}
+
+.drainage-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.secondary-map-action.strong {
+  border-color: #4f7f89;
+  background: #e7f0f2;
+  color: #1f5661;
+}
+
+
+/* =========================================================
+   STEP 6 — TERRAIN / ELEVATION INTELLIGENCE
+   ========================================================= */
+
+.terrain-live-label {
+  color: #6b6d42 !important;
+  font-weight: 700;
+}
+
+.terrain-feed-status {
+  margin-top: 7px;
+  padding-top: 8px;
+  border-top: 1px solid #e1e7ea;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.terrain-feed-status span {
+  color: #6c7981;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.terrain-feed-status small {
+  color: #8f9aa0;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.legend-box {
+  width: 12px;
+  height: 8px;
+  display: inline-block;
+}
+
+.legend-box.hillshade {
+  border: 1px solid #8d9692;
+  background:
+    linear-gradient(
+      135deg,
+      #ece9dc,
+      #7e8b84
+    );
+}
+
+.terrain-hillshade {
+  filter:
+    grayscale(100%)
+    contrast(115%);
+}
+
+.terrain-intel-panel {
+  min-height: 100%;
+}
+
+.terrain-mode-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 0 14px;
+  border-bottom: 1px solid #e1e6e9;
+  color: #6f7d84;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.terrain-band {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border: 1px solid currentColor;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.terrain-low {
+  color: #2f7186 !important;
+}
+
+.terrain-mid {
+  color: #8d762b !important;
+}
+
+.terrain-high {
+  color: #6e654f !important;
+}
+
+.terrain-kpi-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, 1fr);
+  border-top:
+    1px solid #e2e8ea;
+  border-left:
+    1px solid #e2e8ea;
+}
+
+.terrain-kpi-grid > div {
+  min-height: 68px;
+  padding: 9px;
+  border-right:
+    1px solid #e2e8ea;
+  border-bottom:
+    1px solid #e2e8ea;
+}
+
+.terrain-kpi-grid span {
+  display: block;
+  margin-bottom: 7px;
+  color: #7b878e;
+  font-size: 8px;
+}
+
+.terrain-kpi-grid strong {
+  color: #18323b;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.terrain-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.terrain-ranking button {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px;
+  border: 1px solid #dfe5e7;
+  background: #fbfcfc;
+  text-align: left;
+}
+
+.terrain-ranking button.active {
+  border-color: #6b8f98;
+  background: #edf4f5;
+}
+
+.terrain-ranking button > div:first-child {
+  min-width: 0;
+}
+
+.terrain-ranking strong {
+  display: block;
+  color: #2a3a41;
+  font-size: 9px;
+}
+
+.terrain-ranking span {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: #7f8b91;
+  font-size: 7px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.terrain-ranking-value {
+  text-align: right;
+}
+
+.terrain-ranking-value strong {
+  font-size: 10px;
+}
+
+.terrain-ranking-value span {
+  margin-top: 3px;
+  font-size: 7px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.terrain-open-action {
+  margin-top: 7px;
+}
+
+
+/* =========================================================
+   STEP 6.1 FIX — RIGHT PANEL SCROLL / STICKY SUMMARY
+   ========================================================= */
+
+/*
+  The earlier prototype kept the locality/risk header sticky.
+  That caused the top block to feel stuck and could overlap
+  the scrollable intelligence sections. Keep it in normal flow.
+*/
+.intel-summary {
+  position: static !important;
+  top: auto !important;
+  z-index: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #ffffff;
+  border-bottom: 0;
+}
+
+.intel-panel {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.intel-summary .source-note {
+  border-bottom: 1px solid #e1e6e9;
+}
+
+
+/* =========================================================
+   STEP 7 — EXPLAINABLE BACKEND RISK ENGINE
+   ========================================================= */
+
+.risk-breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid #e2e8ea;
+  border-left: 1px solid #e2e8ea;
+}
+
+.risk-breakdown > div {
+  min-height: 58px;
+  padding: 9px;
+  border-right: 1px solid #e2e8ea;
+  border-bottom: 1px solid #e2e8ea;
+}
+
+.risk-breakdown span {
+  display: block;
+  margin-bottom: 6px;
+  color: #7a878e;
+  font-size: 8px;
+}
+
+.risk-breakdown strong {
+  color: #24363d;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.risk-breakdown .not-scored {
+  color: #9a6f31;
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.risk-reasons {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.risk-reasons li {
+  position: relative;
+  padding: 5px 0 5px 14px;
+  color: #66757c;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.risk-reasons li::before {
+  content: "•";
+  position: absolute;
+  left: 1px;
+  color: #437781;
+}
+
+.risk-engine-warning {
+  margin-top: 9px;
+  padding: 8px 9px;
+  border-left: 3px solid #b2733a;
+  background: #fbf7f1;
+  color: #8a694a;
+  font-size: 8px;
+}
+
+
+/* =========================================================
+   STEP 7.2 — PROFESSIONAL DRAINAGE MAP VISUALS
+   ========================================================= */
+
+.drainage-tooltip {
+  padding: 6px 8px !important;
+  border: 1px solid #c5d8dc !important;
+  border-radius: 2px !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  color: #23414a !important;
+  box-shadow: 0 4px 14px rgba(20, 48, 57, 0.16) !important;
+}
+
+.drainage-tooltip strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 9px;
+}
+
+.drainage-tooltip span {
+  display: block;
+  color: #75838a;
+  font-size: 8px;
+  text-transform: capitalize;
+}
+
+.drainage-popup small {
+  display: block;
+  margin-top: 5px;
+  color: #89959b;
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+.legend-line.canal {
+  width: 16px;
+  border-top: 4px solid #006e82;
+  border-radius: 4px;
+}
+
+.legend-line.drain {
+  width: 16px;
+  border-top: 3px solid #0788a0;
+  border-radius: 4px;
+}
+
+.legend-line.ditch {
+  width: 16px;
+  border-top: 2px dashed #5e95a2;
+}
+
+.drainage-focus-chip {
+  position: absolute;
+  left: 18px;
+  top: 106px;
+  z-index: 1000;
+  min-width: 245px;
+  padding: 9px 11px;
+  border: 1px solid #cbdadd;
+  border-left: 3px solid #0788a0;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 3px 12px rgba(24, 58, 68, 0.09);
+}
+
+.drainage-focus-chip strong {
+  display: block;
+  color: #17343d;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.drainage-focus-counts {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.drainage-focus-counts span {
+  color: #748188;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Let the network read as a mapped infrastructure layer,
+   rather than random thin teal lines. */
+.leaflet-overlay-pane path {
+  transition:
+    stroke-width 120ms ease,
+    stroke-opacity 120ms ease;
+}
+
+/* Reduce map-overlay competition while DRains mode is active. */
+.drainage-intel-panel .panel-section {
+  border-bottom-color: #e4e9eb;
+}
+
+@media (max-width: 1250px) {
+  .drainage-focus-chip {
+    min-width: 220px;
+  }
+}
+
+
+/* =========================================================
+   STEP 7.3 — DRAINAGE ON-DEMAND LOADING
+   ========================================================= */
+
+.drainage-live-label {
+  min-width: 34px;
+  text-align: right;
+}
+
+.drainage-live-label.offline {
+  color: #b36d39 !important;
+}
+
+.layer-panel label:has(input:not(:disabled)) {
+  cursor: pointer;
+}
+
+.layer-panel label:has(input:disabled) {
+  cursor: wait;
+}
+
+.drainage-feed-status span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   STEP 8 — SMART GOOGLE-LIKE ROUTING UX
+   ========================================================= */
+
+.smart-route-panel {
+  min-height: 100%;
+}
+
+.route-disclaimer.smart {
+  background: #f6f9fa;
+  padding-left: 9px;
+  padding-right: 9px;
+  border-left: 3px solid #4f7f89;
+}
+
+.route-mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 12px;
+  border: 1px solid #ccd7db;
+}
+
+.route-mode-switch button {
+  min-height: 34px;
+  border: 0;
+  background: #ffffff;
+  color: #6f7d84;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.route-mode-switch button + button {
+  border-left: 1px solid #ccd7db;
+}
+
+.route-mode-switch button.active {
+  background: #143f49;
+  color: #ffffff;
+}
+
+.route-location-button {
+  width: 100%;
+  min-height: 35px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 7px;
+  padding: 0 10px;
+  border: 1px solid #b7c9ce;
+  background: #edf5f6;
+  color: #255b65;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.smart-destination-field {
+  position: relative;
+  margin-top: 14px;
+}
+
+.smart-destination-field > label {
+  display: block;
+  margin-bottom: 6px;
+  color: #65737b;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.smart-search-input {
+  min-height: 40px;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  border: 1px solid #cbd6da;
+  background: #ffffff;
+}
+
+.smart-search-input > span {
+  text-align: center;
+  color: #738188;
+}
+
+.smart-search-input input {
+  min-width: 0;
+  height: 38px;
+  border: 0;
+  outline: 0;
+  color: #203039;
+}
+
+.smart-search-input small {
+  padding-right: 8px;
+  color: #728087;
+  font-size: 7px;
+  text-transform: uppercase;
+}
+
+.route-suggestions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 65px;
+  z-index: 3500;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #cbd6da;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(20, 43, 51, 0.14);
+}
+
+.route-suggestions button {
+  width: 100%;
+  display: block;
+  padding: 9px 10px;
+  border: 0;
+  border-bottom: 1px solid #edf0f1;
+  background: #ffffff;
+  text-align: left;
+}
+
+.route-suggestions button:hover {
+  background: #f2f7f8;
+}
+
+.route-suggestions strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #26363d;
+  font-size: 9px;
+}
+
+.route-suggestions span {
+  display: block;
+  color: #7e8b91;
+  font-size: 7px;
+  line-height: 1.4;
+}
+
+.destination-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 7px;
+  padding: 8px 9px;
+  border: 1px solid #e0e6e8;
+  background: #fafcfc;
+}
+
+.destination-selected > div {
+  min-width: 0;
+}
+
+.destination-selected span {
+  display: block;
+  color: #8a959b;
+  font-size: 7px;
+  text-transform: uppercase;
+}
+
+.destination-selected strong {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: #293a41;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.destination-selected button {
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 0 7px;
+  border: 1px solid #bccbd0;
+  background: #ffffff;
+  color: #426b73;
+  font-size: 7px;
+  font-weight: 700;
+}
+
+.destination-selected button.active {
+  background: #143f49;
+  color: #ffffff;
+}
+
+.route-quick-places {
+  display: flex;
+  gap: 5px;
+  margin-top: 8px;
+  overflow-x: auto;
+  padding-bottom: 3px;
+}
+
+.route-quick-places button {
+  flex: 0 0 auto;
+  min-height: 27px;
+  padding: 0 8px;
+  border: 1px solid #d2dade;
+  background: #ffffff;
+  color: #66757c;
+  font-size: 7px;
+}
+
+.navigation-summary {
+  padding-top: 14px;
+}
+
+.navigation-eta {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  border-top: 1px solid #e1e7e9;
+  border-left: 1px solid #e1e7e9;
+}
+
+.navigation-eta > div {
+  min-height: 72px;
+  padding: 10px;
+  border-right: 1px solid #e1e7e9;
+  border-bottom: 1px solid #e1e7e9;
+}
+
+.navigation-eta strong {
+  display: block;
+  color: #142a32;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+.navigation-eta > div:last-child strong {
+  font-size: 14px;
+}
+
+.navigation-eta span {
+  display: block;
+  margin-top: 4px;
+  color: #7d898f;
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.route-risk-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 9px;
+  padding: 9px 10px;
+  border-left: 3px solid #c58b34;
+  background: #fbf8f1;
+}
+
+.route-risk-banner span {
+  display: block;
+  color: #8b8171;
+  font-size: 7px;
+  text-transform: uppercase;
+}
+
+.route-risk-banner strong {
+  display: block;
+  margin-top: 2px;
+  color: #4a4030;
+  font-size: 9px;
+}
+
+.route-risk-score {
+  min-width: 32px;
+  text-align: right;
+  color: #a87125;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.route-action-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.start-navigation,
+.stop-navigation,
+.route-refresh {
+  min-height: 38px;
+  border: 0;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.start-navigation {
+  background: #12677a;
+  color: #ffffff;
+}
+
+.stop-navigation {
+  background: #953f36;
+  color: #ffffff;
+}
+
+.route-refresh {
+  padding: 0 12px;
+  border: 1px solid #becbd0;
+  background: #ffffff;
+  color: #44646c;
+}
+
+.voice-route-toggle {
+  min-height: 34px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 0 9px;
+  border: 1px solid #d9e0e3;
+  color: #5e6e75;
+  font-size: 8px;
+}
+
+.voice-route-toggle input {
+  accent-color: #17687a;
+}
+
+.voice-route-toggle small {
+  color: #849097;
+}
+
+.smart-route-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.smart-route-options button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 10px;
+  border: 1px solid #d9e1e4;
+  background: #ffffff;
+  text-align: left;
+}
+
+.smart-route-options button.active {
+  border-color: #4f7e88;
+  background: #edf4f5;
+}
+
+.smart-route-options strong {
+  display: block;
+  color: #2b3b42;
+  font-size: 9px;
+}
+
+.smart-route-options span {
+  display: block;
+  margin-top: 2px;
+  color: #7c898f;
+  font-size: 7px;
+}
+
+.smart-route-options > button > div:last-child {
+  text-align: right;
+}
+
+.turn-by-turn-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.turn-step {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 52px;
+  border-bottom: 1px solid #e5eaec;
+}
+
+.turn-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #c7d6da;
+  background: #f0f6f7;
+  color: #245e68;
+  font-size: 15px;
+}
+
+.turn-step strong {
+  display: block;
+  color: #2e3e45;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.turn-step div span {
+  display: block;
+  margin-top: 3px;
+  color: #8a959a;
+  font-size: 7px;
+}
+
+.more-turns {
+  padding: 8px 0;
+  color: #7d8a90;
+  font-size: 8px;
+}
+
+.smart-route-panel .route-source-note {
+  margin-bottom: 10px;
+}
+
+
+/* =========================================================
+   STEP 9 — FLOOD STRESS TEST + SIDE-ROAD DETOURS
+   ========================================================= */
+
+.route-stress-controls {
+  display: flex;
+  flex-direction: column;
+  margin: 10px 0 4px;
+  border: 1px solid #d9e1e4;
+  background: #fbfcfc;
+}
+
+.route-stress-controls label {
+  min-height: 39px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 0 9px;
+  color: #56666d;
+  font-size: 8px;
+}
+
+.route-stress-controls label + label {
+  border-top: 1px solid #e7ebed;
+}
+
+.route-stress-controls input {
+  accent-color: #a84b36;
+}
+
+.route-stress-controls small {
+  color: #8b969b;
+  font-size: 7px;
+}
+
+.demo-route-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 8px 0 12px;
+  padding: 9px;
+  border-left: 3px solid #b84736;
+  background: #fbf2f0;
+}
+
+.demo-route-warning strong {
+  flex: 0 0 auto;
+  color: #a23b31;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}
+
+.demo-route-warning span {
+  color: #786965;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.demo-flood-popup small {
+  display: block;
+  margin-top: 5px;
+  color: #a04738;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.smart-route-options button.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #176b7b;
+}
+
+
+/* =========================================================
+   STEP 9.1 — STRICT FLOOD AVOIDANCE
+   ========================================================= */
+
+.route-crossing-warning {
+  color: #a4473b !important;
+  font-weight: 700;
+}
+
+.route-clear-status {
+  color: #2f7554 !important;
+  font-weight: 700;
+}
+
+.danger-number {
+  color: #ad4338 !important;
+}
+
+.safe-number {
+  color: #2f7554 !important;
+}
+
+.smart-route-options button:has(.route-crossing-warning) {
+  border-left: 3px solid #b14c42;
+}
+
+.smart-route-options button:has(.route-clear-status) {
+  border-left: 3px solid #3a8160;
+}
+
+
+/* =========================================================
+   STEP 9.2 — GPS START / ROAD SNAP FIX
+   ========================================================= */
+
+.manual-start-box {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  margin-top: 7px;
+}
+
+.manual-start-box button {
+  min-height: 34px;
+  padding: 0 9px;
+  border: 1px solid #b8c8cd;
+  background: #edf4f5;
+  color: #285d67;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.manual-start-box button.active {
+  background: #143f49;
+  color: #ffffff;
+}
+
+.manual-start-box span {
+  overflow: hidden;
+  color: #7d898f;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.start-snap-warning {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 8px;
+  padding: 8px 9px;
+  border-left: 3px solid #708e96;
+  background: #f2f6f7;
+}
+
+.start-snap-warning.strong {
+  border-left-color: #b2573f;
+  background: #fbf3f1;
+}
+
+.start-snap-warning strong {
+  color: #344a52;
+  font-size: 8px;
+}
+
+.start-snap-warning span {
+  color: #78858b;
+  font-size: 8px;
+  line-height: 1.4;
+}
