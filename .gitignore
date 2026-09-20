@@ -10,3 +10,11 @@ __pycache__/
 !.env.example
 !.env.production.example
 .vscode/
+dist/
+venv/
+.venv/
+backend/venv/
+.env
+*.db
+__pycache__/
+*.pyc
