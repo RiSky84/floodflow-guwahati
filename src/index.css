@@ -2868,3 +2868,254 @@ button {
   font-size: 8px;
   line-height: 1.4;
 }
+
+
+/* ==========================================================
+   STEP 10 — TRUSTED REPORT OPERATIONS
+   ========================================================== */
+
+.reports-intel-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.reports-mode-note {
+  margin: 0 20px 2px;
+  padding: 12px 14px;
+  border: 1px solid #d8e3e8;
+  border-radius: 12px;
+  background: #f6fafb;
+  color: #53656f;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.reports-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.reports-kpi-grid > div {
+  padding: 11px 12px;
+  border: 1px solid #dce5e9;
+  border-radius: 10px;
+  background: #fbfdfe;
+}
+
+.reports-kpi-grid span {
+  display: block;
+  color: #70808a;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.reports-kpi-grid strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+  color: #163844;
+}
+
+.reports-new-button {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.admin-key-field {
+  display: grid;
+  gap: 6px;
+  color: #52646e;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.admin-key-field input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ccd9df;
+  border-radius: 9px;
+  background: #fff;
+  padding: 10px 11px;
+  color: #173b46;
+  outline: none;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.admin-key-field input:focus {
+  border-color: #26899d;
+  box-shadow: 0 0 0 3px rgba(38, 137, 157, .1);
+}
+
+.reports-admin-help {
+  margin: 8px 0 0;
+  color: #7a8991;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.report-admin-message {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #eef7f4;
+  color: #246354;
+  font-size: 11px;
+}
+
+.report-ops-list {
+  display: grid;
+  gap: 9px;
+}
+
+.report-ops-card {
+  padding: 11px;
+  border: 1px solid #dbe5e9;
+  border-radius: 11px;
+  background: #fff;
+}
+
+.report-ops-card.stale {
+  opacity: .67;
+  background: #f7f8f8;
+}
+
+.report-ops-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.report-ops-heading > div:first-child {
+  min-width: 0;
+}
+
+.report-ops-heading strong {
+  display: block;
+  color: #183b46;
+  font-size: 13px;
+}
+
+.report-ops-heading > div:first-child span {
+  display: block;
+  margin-top: 3px;
+  color: #829098;
+  font-size: 10px;
+}
+
+.report-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.freshness-badge,
+.verification-badge {
+  border-radius: 999px;
+  padding: 3px 6px;
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.freshness-badge.live {
+  background: #dff6ee;
+  color: #16725f;
+}
+
+.freshness-badge.recent,
+.freshness-badge.fresh {
+  background: #e7f2f6;
+  color: #276b7e;
+}
+
+.freshness-badge.stale {
+  background: #edf0f1;
+  color: #748087;
+}
+
+.verification-badge.verified {
+  background: #def3e9;
+  color: #176a56;
+}
+
+.verification-badge.pending {
+  background: #fff1d7;
+  color: #8b641c;
+}
+
+.report-ops-metrics {
+  display: flex;
+  gap: 7px;
+  margin-top: 9px;
+  flex-wrap: wrap;
+}
+
+.report-ops-metrics > span {
+  padding: 4px 7px;
+  border-radius: 7px;
+  background: #f0f5f7;
+  color: #536772;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.report-ops-metrics .road-state.blocked {
+  background: #fde9e7;
+  color: #9b4038;
+}
+
+.report-ops-metrics .road-state.caution {
+  background: #fff2d8;
+  color: #8a631d;
+}
+
+.report-ops-metrics .road-state.open {
+  background: #e3f4ed;
+  color: #28705c;
+}
+
+.report-ops-card p {
+  margin: 8px 0 0;
+  color: #677780;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.report-review-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.report-review-actions button {
+  border: 1px solid #b9d7cf;
+  border-radius: 8px;
+  background: #edf8f4;
+  color: #1c6957;
+  padding: 7px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.report-review-actions button.reject {
+  border-color: #edceca;
+  background: #fff3f1;
+  color: #964b43;
+}
+
+.report-review-actions button:disabled {
+  opacity: .5;
+  cursor: wait;
+}

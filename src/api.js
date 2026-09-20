@@ -1,10 +1,30 @@
 const API =
-  import.meta.env.VITE_API_URL ||
-  "http://127.0.0.1:8000/api";
+  (
+    import.meta.env.VITE_API_URL ||
+    "http://127.0.0.1:8000/api"
+  ).replace(/\/$/, "");
 
-export async function getWeather() {
+export async function getWeather(
+  lat = null,
+  lon = null
+) {
+  const params = new URLSearchParams();
+
+  if (
+    Number.isFinite(Number(lat)) &&
+    Number.isFinite(Number(lon))
+  ) {
+    params.set("lat", String(lat));
+    params.set("lon", String(lon));
+  }
+
+  const suffix = params.toString()
+    ? `?${params.toString()}`
+    : "";
+
   const response = await fetch(
-    `${API}/weather`
+    `${API}/weather${suffix}`,
+    { cache: "no-store" }
   );
 
   if (!response.ok) {
@@ -34,7 +54,8 @@ export async function getRiver() {
 
 export async function getFloodReports() {
   const response = await fetch(
-    `${API}/reports`
+    `${API}/reports`,
+    { cache: "no-store" }
   );
 
   if (!response.ok) {
@@ -74,6 +95,43 @@ export async function submitFloodReport(
   return response.json();
 }
 
+
+export async function verifyFloodReport(
+  reportId,
+  status,
+  adminKey,
+  note = ""
+) {
+  const response = await fetch(
+    `${API}/reports/${reportId}/verify`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Admin-Key": adminKey,
+      },
+      body: JSON.stringify({
+        status,
+        note,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    let detail = "Could not verify report";
+
+    try {
+      const data = await response.json();
+      detail = data?.detail || detail;
+    } catch {
+      // Keep the fallback message.
+    }
+
+    throw new Error(detail);
+  }
+
+  return response.json();
+}
 
 const RAINVIEWER =
   "https://api.rainviewer.com/public/weather-maps.json";
@@ -453,7 +511,8 @@ export async function getTerrainSamples(
 
 export async function getRisks() {
   const response = await fetch(
-    `${API}/risks`
+    `${API}/risks`,
+    { cache: "no-store" }
   );
 
   if (!response.ok) {

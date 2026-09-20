@@ -1,13 +1,15 @@
 import sqlite3
+import os
 import math
 import time
+import secrets
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
 from datetime import datetime, timedelta
 from typing import Literal
 
 import requests
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -25,9 +27,32 @@ app = FastAPI(
 # CORS
 # ==========================================================
 
+DEFAULT_FRONTEND_ORIGINS = [
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "https://floodflow.netlify.app",
+]
+
+extra_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "FRONTEND_ORIGINS",
+        ""
+    ).split(",")
+    if origin.strip()
+]
+
+ALLOWED_FRONTEND_ORIGINS = list(
+    dict.fromkeys(
+        DEFAULT_FRONTEND_ORIGINS
+        + extra_origins
+    )
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
+    allow_origins=
+        ALLOWED_FRONTEND_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -42,7 +67,10 @@ app.add_middleware(
 def home():
     return {
         "project": "FloodFlow Guwahati",
-        "status": "running"
+        "status": "running",
+        "frontend":
+            "https://floodflow.netlify.app",
+        "docs": "/docs"
     }
 
 
@@ -809,7 +837,7 @@ def make_bypass_pair(
     # Two via points form a real bypass corridor.
     # The previous version used only one point,
     # allowing OSRM to cut straight back through
-    # the flood circle afterwards.
+    # the hazard area afterwards.
     along_m = radius + 500
     offset_m = radius + 650
 
@@ -1145,7 +1173,7 @@ def tag_route_hazard_intersections(
     ] = intersections
 
     route[
-        "floodflow_safe_from_demo_hazards"
+        "floodflow_safe_from_hazards"
     ] = (
         len(intersections) == 0
     )
@@ -1232,7 +1260,7 @@ def get_smart_route(
             item["route_fraction"]
     )
 
-    # Up to three relevant hazards are bypassed.
+    # Up to three current relevant hazards are bypassed.
     selected_hazards = (
         relevant_hazards[:3]
     )
@@ -1388,7 +1416,7 @@ def get_smart_route(
             route
         )
 
-    # Flood-free candidates are returned first.
+    # Hazard-free candidates are returned first.
     unique_routes.sort(
         key=lambda route: (
             len(
@@ -1418,7 +1446,7 @@ def get_smart_route(
                 1
                 for route in unique_routes
                 if route.get(
-                    "floodflow_safe_from_demo_hazards"
+                    "floodflow_safe_from_hazards"
                 )
             ),
         "strict_bypass_candidates":
@@ -1430,7 +1458,7 @@ def get_smart_route(
                 )
                 == "strict-flood-bypass"
             ),
-        "simulation_hazards_received":
+        "live_hazards_received":
             len(hazard_points),
     }
 
@@ -1448,6 +1476,21 @@ def get_db():
     return conn
 
 
+def ensure_column(conn, table_name, column_name, definition):
+    columns = {
+        row["name"]
+        for row in conn.execute(
+            f"PRAGMA table_info({table_name})"
+        ).fetchall()
+    }
+
+    if column_name not in columns:
+        conn.execute(
+            f"ALTER TABLE {table_name} "
+            f"ADD COLUMN {column_name} {definition}"
+        )
+
+
 def create_database():
     conn = get_db()
 
@@ -1461,8 +1504,41 @@ def create_database():
             locality TEXT,
             note TEXT,
             created_at TEXT NOT NULL,
-            verified INTEGER DEFAULT 0
+            verified INTEGER DEFAULT 0,
+            verification_status TEXT DEFAULT 'pending',
+            verified_at TEXT,
+            verification_note TEXT
         )
+    """)
+
+    # Safe migration for databases created by older FloodFlow builds.
+    ensure_column(
+        conn,
+        "flood_reports",
+        "verification_status",
+        "TEXT DEFAULT 'pending'"
+    )
+    ensure_column(
+        conn,
+        "flood_reports",
+        "verified_at",
+        "TEXT"
+    )
+    ensure_column(
+        conn,
+        "flood_reports",
+        "verification_note",
+        "TEXT"
+    )
+
+    conn.execute("""
+        UPDATE flood_reports
+        SET verification_status = CASE
+            WHEN verified = 1 THEN 'verified'
+            ELSE COALESCE(verification_status, 'pending')
+        END
+        WHERE verification_status IS NULL
+           OR verification_status = ''
     """)
 
     conn.commit()
@@ -1513,6 +1589,48 @@ class FloodReport(BaseModel):
 # GET FLOOD REPORTS
 # ==========================================================
 
+def serialize_report(row):
+    report = dict(row)
+
+    try:
+        created_at = datetime.fromisoformat(
+            report["created_at"]
+        )
+        age_minutes = max(
+            0,
+            int(
+                (datetime.now() - created_at)
+                .total_seconds() / 60
+            )
+        )
+    except Exception:
+        age_minutes = None
+
+    status = (
+        report.get("verification_status")
+        or (
+            "verified"
+            if report.get("verified")
+            else "pending"
+        )
+    )
+
+    report["verification_status"] = status
+    report["verified"] = bool(
+        report.get("verified")
+    ) or status == "verified"
+    report["age_minutes"] = age_minutes
+    report["active"] = (
+        status != "rejected"
+        and (
+            age_minutes is None
+            or age_minutes <= 360
+        )
+    )
+
+    return report
+
+
 @app.get("/api/reports")
 def get_reports():
     conn = get_db()
@@ -1527,7 +1645,7 @@ def get_reports():
     conn.close()
 
     return [
-        dict(row)
+        serialize_report(row)
         for row in rows
     ]
 
@@ -1552,9 +1670,10 @@ def create_report(
             locality,
             note,
             created_at,
-            verified
+            verified,
+            verification_status
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             report.latitude,
@@ -1564,7 +1683,8 @@ def create_report(
             report.locality,
             report.note,
             datetime.now().isoformat(),
-            0
+            0,
+            "pending"
         )
     )
 
@@ -1577,85 +1697,202 @@ def create_report(
     return {
         "success": True,
         "report_id": report_id,
+        "verification_status": "pending",
         "message":
             "Flood report submitted successfully"
     }
 
 
 # ==========================================================
-# EXPLAINABLE FLOOD RISK ENGINE
+# REPORT VERIFICATION
 # ==========================================================
 
-HOTSPOTS = [
+class ReportVerification(BaseModel):
+    status: Literal[
+        "verified",
+        "rejected"
+    ]
+
+    note: str = Field(
+        default="",
+        max_length=300
+    )
+
+
+def require_admin_key(admin_key):
+    configured_key = os.getenv(
+        "FLOODFLOW_ADMIN_KEY",
+        ""
+    ).strip()
+
+    if not configured_key:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Report verification is not configured. "
+                "Set FLOODFLOW_ADMIN_KEY on the backend."
+            )
+        )
+
+    if not admin_key or not secrets.compare_digest(
+        admin_key,
+        configured_key
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid FloodFlow admin key"
+        )
+
+
+@app.patch("/api/reports/{report_id}/verify")
+def verify_report(
+    report_id: int,
+    verification: ReportVerification,
+    admin_key: str | None = Header(
+        default=None,
+        alias="X-Admin-Key"
+    )
+):
+    require_admin_key(admin_key)
+
+    conn = get_db()
+
+    existing = conn.execute(
+        "SELECT id FROM flood_reports WHERE id = ?",
+        (report_id,)
+    ).fetchone()
+
+    if not existing:
+        conn.close()
+        raise HTTPException(
+            status_code=404,
+            detail="Flood report not found"
+        )
+
+    is_verified = (
+        1
+        if verification.status == "verified"
+        else 0
+    )
+    verified_at = (
+        datetime.now().isoformat()
+        if verification.status == "verified"
+        else None
+    )
+
+    conn.execute(
+        """
+        UPDATE flood_reports
+        SET verified = ?,
+            verification_status = ?,
+            verified_at = ?,
+            verification_note = ?
+        WHERE id = ?
+        """,
+        (
+            is_verified,
+            verification.status,
+            verified_at,
+            verification.note,
+            report_id
+        )
+    )
+
+    conn.commit()
+
+    row = conn.execute(
+        "SELECT * FROM flood_reports WHERE id = ?",
+        (report_id,)
+    ).fetchone()
+
+    conn.close()
+
+    return {
+        "success": True,
+        "report": serialize_report(row)
+    }
+
+
+# ==========================================================
+# LIVE DERIVED FLOOD-RISK ENGINE
+# ==========================================================
+
+# These are geographic monitoring anchors only. They do not
+# contain any dummy/fabricated risk scores. Risk is calculated
+# at request time from current model weather, real DEM terrain
+# and recent FloodFlow ground reports.
+MONITORING_POINTS = [
     {
-        "name": "Rukminigaon",
-        "lat": 26.136,
-        "lng": 91.801,
-        "historical_prior": 70,
-        "basin": "Silsako Basin",
+        "name": "Azara / GCU",
+        "lat": 26.1328,
+        "lng": 91.6222,
+        "basin": "Deepar Basin",
     },
     {
-        "name": "Hatigaon",
-        "lat": 26.116,
-        "lng": 91.789,
-        "historical_prior": 60,
-        "basin": "Silsako Basin",
-    },
-    {
-        "name": "Japorigog",
-        "lat": 26.161,
-        "lng": 91.783,
-        "historical_prior": 75,
-        "basin": "Bharalu Basin",
+        "name": "Maligaon",
+        "lat": 26.157,
+        "lng": 91.696,
+        "basin": "Deepar Basin",
     },
     {
         "name": "Kahilipara",
         "lat": 26.122,
         "lng": 91.756,
-        "historical_prior": 55,
         "basin": "Bharalu Basin",
+    },
+    {
+        "name": "Japorigog",
+        "lat": 26.161,
+        "lng": 91.783,
+        "basin": "Bharalu Basin",
+    },
+    {
+        "name": "Hatigaon",
+        "lat": 26.116,
+        "lng": 91.789,
+        "basin": "Silsako Basin",
+    },
+    {
+        "name": "Rukminigaon",
+        "lat": 26.136,
+        "lng": 91.801,
+        "basin": "Silsako Basin",
     },
     {
         "name": "Hengrabari",
         "lat": 26.151,
         "lng": 91.789,
-        "historical_prior": 40,
         "basin": "Silsako Basin",
     },
     {
         "name": "Satgaon",
         "lat": 26.175,
         "lng": 91.823,
-        "historical_prior": 58,
         "basin": "Silsako Basin",
-    },
-    {
-        "name": "Maligaon",
-        "lat": 26.157,
-        "lng": 91.696,
-        "historical_prior": 57,
-        "basin": "Deepar Basin",
     },
     {
         "name": "Noonmati",
         "lat": 26.191,
         "lng": 91.79,
-        "historical_prior": 42,
         "basin": "Foreshore Basin",
     },
     {
         "name": "Bamunimaidam",
         "lat": 26.187,
         "lng": 91.769,
-        "historical_prior": 61,
         "basin": "Foreshore Basin",
     },
 ]
 
-
 ELEVATION_CACHE_SECONDS = 30 * 60
+LIVE_WEATHER_CACHE_SECONDS = 90
 
 elevation_cache = {
+    "saved_at": 0.0,
+    "values": None,
+}
+
+live_weather_cache = {
     "saved_at": 0.0,
     "values": None,
 }
@@ -1670,7 +1907,6 @@ def haversine_meters(
     from math import asin, cos, radians, sin, sqrt
 
     radius = 6371000
-
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
 
@@ -1681,14 +1917,10 @@ def haversine_meters(
         * sin(dlon / 2) ** 2
     )
 
-    return (
-        2
-        * radius
-        * asin(sqrt(a))
-    )
+    return 2 * radius * asin(sqrt(a))
 
 
-def get_hotspot_elevations():
+def get_monitoring_elevations():
     now = time.time()
 
     if (
@@ -1700,361 +1932,392 @@ def get_hotspot_elevations():
 
     latitudes = ",".join(
         str(item["lat"])
-        for item in HOTSPOTS
+        for item in MONITORING_POINTS
     )
-
     longitudes = ",".join(
         str(item["lng"])
-        for item in HOTSPOTS
-    )
-
-    url = (
-        "https://api.open-meteo.com/v1/elevation"
-        f"?latitude={latitudes}"
-        f"&longitude={longitudes}"
+        for item in MONITORING_POINTS
     )
 
     response = requests.get(
-        url,
-        timeout=20
+        "https://api.open-meteo.com/v1/elevation",
+        params={
+            "latitude": latitudes,
+            "longitude": longitudes,
+        },
+        timeout=20,
     )
-
     response.raise_for_status()
 
-    values = response.json().get(
-        "elevation",
-        []
-    )
-
-    if len(values) != len(HOTSPOTS):
-        raise ValueError(
-            "Elevation response was incomplete"
-        )
+    values = response.json().get("elevation", [])
+    if len(values) != len(MONITORING_POINTS):
+        raise ValueError("Elevation response was incomplete")
 
     result = {
         item["name"]: float(value)
         for item, value in zip(
-            HOTSPOTS,
-            values
+            MONITORING_POINTS,
+            values,
         )
     }
 
     elevation_cache["saved_at"] = now
     elevation_cache["values"] = result
+    return result
 
+
+def calculate_rolling_24h(item):
+    current = item.get("current", {})
+    hourly = item.get("hourly", {})
+    current_time_text = current.get("time")
+
+    if not current_time_text:
+        return 0.0
+
+    current_time = datetime.fromisoformat(current_time_text)
+    start_time = current_time - timedelta(hours=24)
+    total = 0.0
+
+    for time_text, value in zip(
+        hourly.get("time", []),
+        hourly.get("precipitation", []),
+    ):
+        timestamp = datetime.fromisoformat(time_text)
+        if start_time < timestamp <= current_time:
+            total += float(value or 0)
+
+    return round(total, 2)
+
+
+def get_live_weather_points():
+    now = time.time()
+
+    if (
+        live_weather_cache["values"] is not None
+        and now - live_weather_cache["saved_at"]
+        < LIVE_WEATHER_CACHE_SECONDS
+    ):
+        return live_weather_cache["values"]
+
+    latitudes = ",".join(
+        str(item["lat"])
+        for item in MONITORING_POINTS
+    )
+    longitudes = ",".join(
+        str(item["lng"])
+        for item in MONITORING_POINTS
+    )
+
+    response = requests.get(
+        "https://api.open-meteo.com/v1/forecast",
+        params={
+            "latitude": latitudes,
+            "longitude": longitudes,
+            "current": (
+                "temperature_2m,"
+                "relative_humidity_2m,"
+                "precipitation,rain"
+            ),
+            "hourly": "precipitation",
+            "past_days": 1,
+            "forecast_days": 1,
+            "timezone": "Asia/Kolkata",
+        },
+        timeout=25,
+    )
+    response.raise_for_status()
+
+    payload = response.json()
+    rows = payload if isinstance(payload, list) else [payload]
+
+    if len(rows) != len(MONITORING_POINTS):
+        raise ValueError("Live weather response was incomplete")
+
+    result = {}
+
+    for point, item in zip(MONITORING_POINTS, rows):
+        current = item.get("current", {})
+        result[point["name"]] = {
+            "temperature_c": current.get("temperature_2m"),
+            "humidity_percent": current.get("relative_humidity_2m"),
+            "current_precipitation_mm": current.get("precipitation"),
+            "current_rain_mm": current.get("rain"),
+            "rainfall_24h_mm": calculate_rolling_24h(item),
+            "updated_at": current.get("time"),
+        }
+
+    live_weather_cache["saved_at"] = now
+    live_weather_cache["values"] = result
     return result
 
 
 def percentile_value(values, ratio):
     ordered = sorted(values)
-
     if not ordered:
         return None
 
-    index = round(
-        (len(ordered) - 1)
-        * ratio
-    )
-
-    index = max(
-        0,
-        min(
-            len(ordered) - 1,
-            index
-        )
-    )
-
+    index = round((len(ordered) - 1) * ratio)
+    index = max(0, min(len(ordered) - 1, index))
     return ordered[index]
 
 
-def get_rainfall_modifier(rainfall_24h):
-    if rainfall_24h >= 70:
+def rainfall_24h_score(value):
+    value = float(value or 0)
+    if value >= 70:
+        return 40
+    if value >= 40:
+        return 32
+    if value >= 20:
         return 22
+    if value >= 10:
+        return 12
+    if value >= 5:
+        return 6
+    if value > 0:
+        return 2
+    return 0
 
-    if rainfall_24h >= 40:
+
+def current_rain_score(value):
+    value = float(value or 0)
+    if value >= 10:
         return 15
-
-    if rainfall_24h >= 20:
+    if value >= 5:
+        return 12
+    if value >= 2:
         return 8
-
-    if rainfall_24h >= 10:
+    if value >= 0.5:
         return 4
-
+    if value > 0:
+        return 2
     return 0
 
 
 def get_risk_level(score):
-    if score >= 80:
+    if score >= 70:
         return "Very High"
-
-    if score >= 60:
+    if score >= 45:
         return "High"
-
-    if score >= 35:
+    if score >= 25:
         return "Medium"
-
     return "Low"
 
 
 def get_recent_reports(hours=6):
     cutoff = (
-        datetime.now()
-        - timedelta(hours=hours)
+        datetime.now() - timedelta(hours=hours)
     ).isoformat()
 
     conn = get_db()
-
     rows = conn.execute(
         """
         SELECT *
         FROM flood_reports
         WHERE created_at >= ?
+          AND COALESCE(verification_status, 'pending') != 'rejected'
         ORDER BY created_at DESC
         """,
-        (cutoff,)
+        (cutoff,),
     ).fetchall()
-
     conn.close()
 
-    return [
-        dict(row)
-        for row in rows
-    ]
+    return [dict(row) for row in rows]
 
 
-def citizen_modifier_for_hotspot(
-    hotspot,
-    reports
-):
-    score = 0
+def citizen_score_for_point(point, reports):
+    score = 0.0
     nearby = []
 
     for report in reports:
         distance = haversine_meters(
-            hotspot["lat"],
-            hotspot["lng"],
+            point["lat"],
+            point["lng"],
             float(report["latitude"]),
-            float(report["longitude"])
+            float(report["longitude"]),
         )
 
         if distance > 1000:
             continue
 
-        report_score = 0
-
+        report_score = 0.0
         if report["road_status"] == "blocked":
-            report_score += 4
+            report_score += 10
         elif report["road_status"] == "caution":
-            report_score += 2
-
-        depth = float(
-            report.get("water_depth_cm")
-            or 0
-        )
-
-        if depth >= 60:
-            report_score += 3
-        elif depth >= 30:
-            report_score += 2
-        elif depth >= 10:
+            report_score += 5
+        else:
             report_score += 1
 
-        score += report_score
+        depth = float(report.get("water_depth_cm") or 0)
+        if depth >= 60:
+            report_score += 8
+        elif depth >= 30:
+            report_score += 5
+        elif depth >= 10:
+            report_score += 2
 
-        nearby.append(
-            {
-                "id": report["id"],
-                "distance_m": round(
-                    distance
-                ),
-                "road_status":
-                    report["road_status"],
-                "water_depth_cm": depth,
-                "verified": bool(
-                    report["verified"]
-                ),
-            }
+        status = (
+            report.get("verification_status")
+            or ("verified" if report.get("verified") else "pending")
         )
+        trust_weight = 1.0 if status == "verified" else 0.65
 
-    return min(score, 12), nearby
+        proximity_weight = max(0.25, 1 - distance / 1200)
+        weighted = report_score * trust_weight * proximity_weight
+        score += weighted
+
+        nearby.append({
+            "id": report["id"],
+            "distance_m": round(distance),
+            "road_status": report["road_status"],
+            "water_depth_cm": depth,
+            "verification_status": status,
+            "trust_weight": trust_weight,
+        })
+
+    return min(round(score), 25), nearby
 
 
 @app.get("/api/risks")
 def get_risks():
-    weather = get_weather()
-
-    rainfall_24h = float(
-        weather.get("rainfall_24h_mm")
-        or 0
-    )
-
-    rainfall_modifier = (
-        get_rainfall_modifier(
-            rainfall_24h
+    try:
+        weather_by_name = get_live_weather_points()
+    except Exception as error:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Live weather grid unavailable: {error}",
         )
-    )
-
-    reports = get_recent_reports(
-        hours=6
-    )
 
     try:
-        elevations = (
-            get_hotspot_elevations()
-        )
+        elevations = get_monitoring_elevations()
     except Exception:
         elevations = {}
 
-    elevation_values = list(
-        elevations.values()
-    )
+    reports = get_recent_reports(hours=6)
 
-    q25 = percentile_value(
-        elevation_values,
-        0.25
-    )
-
-    q50 = percentile_value(
-        elevation_values,
-        0.50
-    )
-
-    q75 = percentile_value(
-        elevation_values,
-        0.75
-    )
+    elevation_values = list(elevations.values())
+    q25 = percentile_value(elevation_values, 0.25)
+    q50 = percentile_value(elevation_values, 0.50)
+    q75 = percentile_value(elevation_values, 0.75)
 
     risks = []
+    updated_values = []
 
-    for hotspot in HOTSPOTS:
-        elevation = elevations.get(
-            hotspot["name"]
-        )
+    for point in MONITORING_POINTS:
+        live_weather = weather_by_name.get(point["name"], {})
+        rainfall_24h = float(live_weather.get("rainfall_24h_mm") or 0)
+        current_rain = float(live_weather.get("current_rain_mm") or 0)
 
-        terrain_modifier = 0
+        rain24_score = rainfall_24h_score(rainfall_24h)
+        rain_now_score = current_rain_score(current_rain)
+
+        elevation = elevations.get(point["name"])
+        terrain_score = 0
         terrain_band = "Unknown"
 
         if elevation is not None:
             if q25 is not None and elevation <= q25:
-                terrain_modifier = 6
+                terrain_score = 20
                 terrain_band = "Lower"
             elif q50 is not None and elevation <= q50:
-                terrain_modifier = 3
+                terrain_score = 14
                 terrain_band = "Lower-mid"
             elif q75 is not None and elevation >= q75:
-                terrain_modifier = -3
+                terrain_score = 3
                 terrain_band = "Higher"
             else:
-                terrain_modifier = 0
+                terrain_score = 8
                 terrain_band = "Mid-range"
 
-        citizen_modifier, nearby_reports = (
-            citizen_modifier_for_hotspot(
-                hotspot,
-                reports
-            )
-        )
-
-        raw_score = (
-            hotspot["historical_prior"]
-            + rainfall_modifier
-            + terrain_modifier
-            + citizen_modifier
+        citizen_score, nearby_reports = citizen_score_for_point(
+            point,
+            reports,
         )
 
         score = max(
             0,
             min(
                 100,
-                round(raw_score)
-            )
+                round(
+                    rain24_score
+                    + rain_now_score
+                    + terrain_score
+                    + citizen_score
+                ),
+            ),
         )
-
         level = get_risk_level(score)
 
         reasons = [
-            (
-                "Historical vulnerability prior "
-                f"{hotspot['historical_prior']}/100"
-            ),
-            (
-                f"Rainfall 24 h: {rainfall_24h:.1f} mm "
-                f"({rainfall_modifier:+d})"
-            ),
+            f"Open-Meteo rolling precipitation: {rainfall_24h:.1f} mm / 24 h (+{rain24_score})",
+            f"Current model rain: {current_rain:.1f} mm (+{rain_now_score})",
         ]
 
         if elevation is not None:
             reasons.append(
-                (
-                    f"DEM elevation: {elevation:.0f} m; "
-                    f"relative terrain {terrain_band} "
-                    f"({terrain_modifier:+d})"
-                )
+                f"Copernicus DEM elevation: {elevation:.0f} m; relative terrain {terrain_band} (+{terrain_score})"
             )
+        else:
+            reasons.append("Elevation feed unavailable; terrain contributed 0")
 
         if nearby_reports:
             reasons.append(
-                (
-                    f"{len(nearby_reports)} recent citizen "
-                    f"report(s) within 1 km "
-                    f"(+{citizen_modifier})"
-                )
+                f"{len(nearby_reports)} recent FloodFlow report(s) within 1 km (+{citizen_score})"
             )
         else:
             reasons.append(
-                "No citizen reports within 1 km in the last 6 hours"
+                "No recent FloodFlow ground reports within 1 km"
             )
 
         reasons.append(
-            "Drainage condition not scored because live blockage/capacity data is unavailable"
+            "Live drain blockage/capacity sensor data is not available, so drainage condition is not scored"
         )
 
-        risks.append(
-            {
-                "name": hotspot["name"],
-                "lat": hotspot["lat"],
-                "lng": hotspot["lng"],
-                "basin": hotspot["basin"],
-                "score": score,
-                "level": level,
-                "components": {
-                    "historical_prior":
-                        hotspot["historical_prior"],
-                    "rainfall_modifier":
-                        rainfall_modifier,
-                    "terrain_modifier":
-                        terrain_modifier,
-                    "citizen_modifier":
-                        citizen_modifier,
-                    "drainage_modifier": 0,
-                },
-                "inputs": {
-                    "rainfall_24h_mm":
-                        rainfall_24h,
-                    "elevation_m": elevation,
-                    "terrain_band":
-                        terrain_band,
-                    "recent_reports_6h":
-                        len(nearby_reports),
-                    "drainage_condition":
-                        "not scored",
-                },
-                "reasons": reasons,
-                "method":
-                    "explainable heuristic prototype",
-                "official_warning": False,
-            }
-        )
+        updated_at = live_weather.get("updated_at")
+        if updated_at:
+            updated_values.append(updated_at)
+
+        risks.append({
+            "name": point["name"],
+            "lat": point["lat"],
+            "lng": point["lng"],
+            "basin": point["basin"],
+            "score": score,
+            "level": level,
+            "components": {
+                "rainfall_24h_score": rain24_score,
+                "current_rain_score": rain_now_score,
+                "terrain_score": terrain_score,
+                "citizen_report_score": citizen_score,
+                "drainage_score": None,
+            },
+            "inputs": {
+                **live_weather,
+                "elevation_m": elevation,
+                "terrain_band": terrain_band,
+                "recent_reports_6h": len(nearby_reports),
+            },
+            "reasons": reasons,
+            "method": "live derived multi-factor index",
+            "official_warning": False,
+            "synthetic_data_used": False,
+        })
 
     return {
         "location": "Guwahati",
-        "updated_at":
-            weather.get("updated_at"),
-        "rainfall_24h_mm":
-            rainfall_24h,
-        "risk_method":
-            "historical prior + rainfall + relative DEM elevation + recent citizen reports",
-        "drainage_note":
-            "Drainage geometry is displayed, but drainage condition is intentionally not scored until live blockage/capacity data is available.",
+        "updated_at": max(updated_values) if updated_values else None,
+        "risk_method": (
+            "current Open-Meteo weather model + Copernicus DEM terrain + recent trusted FloodFlow reports"
+        ),
+        "synthetic_data_used": False,
+        "official_warning": False,
+        "sources": [
+            "Open-Meteo weather model",
+            "Copernicus DEM GLO-90 via Open-Meteo Elevation API",
+            "FloodFlow citizen reports",
+        ],
+        "drainage_note": (
+            "OSM drainage geometry is displayed separately. Live blockage/capacity is not scored because no verified public realtime drain-sensor feed is connected."
+        ),
         "risks": risks,
     }
+

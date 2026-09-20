@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
-  Circle,
   CircleMarker,
   Polyline,
   Popup,
@@ -31,209 +30,69 @@ import {
   getRouteCandidates,
   getFloodReports,
   submitFloodReport,
+  verifyFloodReport,
 } from "./api.js";
 
-const hotspots = [
+const monitoringPoints = [
   {
-    name: "Rukminigaon",
-    lat: 26.136,
-    lng: 91.801,
-    baseScore: 70,
-    populationRisk: 2037,
-    basin: "Silsako Basin",
+    name: "Azara / GCU",
+    lat: 26.1328,
+    lng: 91.6222,
+    basin: "Deepar Basin",
   },
   {
-    name: "Hatigaon",
-    lat: 26.116,
-    lng: 91.789,
-    baseScore: 60,
-    populationRisk: 12912,
-    basin: "Silsako Basin",
-  },
-  {
-    name: "Japorigog",
-    lat: 26.161,
-    lng: 91.783,
-    baseScore: 75,
-    populationRisk: 58246,
-    basin: "Bharalu Basin",
+    name: "Maligaon",
+    lat: 26.157,
+    lng: 91.696,
+    basin: "Deepar Basin",
   },
   {
     name: "Kahilipara",
     lat: 26.122,
     lng: 91.756,
-    baseScore: 55,
-    populationRisk: 986,
     basin: "Bharalu Basin",
+  },
+  {
+    name: "Japorigog",
+    lat: 26.161,
+    lng: 91.783,
+    basin: "Bharalu Basin",
+  },
+  {
+    name: "Hatigaon",
+    lat: 26.116,
+    lng: 91.789,
+    basin: "Silsako Basin",
+  },
+  {
+    name: "Rukminigaon",
+    lat: 26.136,
+    lng: 91.801,
+    basin: "Silsako Basin",
   },
   {
     name: "Hengrabari",
     lat: 26.151,
     lng: 91.789,
-    baseScore: 40,
-    populationRisk: 5765,
     basin: "Silsako Basin",
   },
   {
     name: "Satgaon",
     lat: 26.175,
     lng: 91.823,
-    baseScore: 58,
-    populationRisk: 1492,
     basin: "Silsako Basin",
-  },
-  {
-    name: "Maligaon",
-    lat: 26.157,
-    lng: 91.696,
-    baseScore: 57,
-    populationRisk: 6864,
-    basin: "Deepar Basin",
   },
   {
     name: "Noonmati",
     lat: 26.191,
     lng: 91.79,
-    baseScore: 42,
-    populationRisk: 1636,
     basin: "Foreshore Basin",
   },
   {
     name: "Bamunimaidam",
     lat: 26.187,
     lng: 91.769,
-    baseScore: 61,
-    populationRisk: 5543,
     basin: "Foreshore Basin",
-  },
-];
-
-const demoFloodZones = [
-  {
-    name: "DEMO — GS Road / Christian Basti",
-    lat: 26.1618,
-    lng: 91.7768,
-    level: "Very High",
-    radius_m: 320,
-  },
-  {
-    name: "DEMO — Ganeshguri Junction",
-    lat: 26.1548,
-    lng: 91.7868,
-    level: "Very High",
-    radius_m: 300,
-  },
-  {
-    name: "DEMO — Dispur Last Gate",
-    lat: 26.1437,
-    lng: 91.7928,
-    level: "High",
-    radius_m: 280,
-  },
-  {
-    name: "DEMO — Six Mile",
-    lat: 26.1375,
-    lng: 91.8064,
-    level: "Very High",
-    radius_m: 300,
-  },
-  {
-    name: "DEMO — Beltola Tiniali",
-    lat: 26.1238,
-    lng: 91.7989,
-    level: "High",
-    radius_m: 280,
-  },
-  {
-    name: "DEMO — Basistha Chariali",
-    lat: 26.1112,
-    lng: 91.7868,
-    level: "High",
-    radius_m: 300,
-  },
-  {
-    name: "DEMO — Hatigaon Main Road",
-    lat: 26.1162,
-    lng: 91.7870,
-    level: "Very High",
-    radius_m: 300,
-  },
-  {
-    name: "DEMO — Kahilipara Main Road",
-    lat: 26.1230,
-    lng: 91.7555,
-    level: "High",
-    radius_m: 290,
-  },
-  {
-    name: "DEMO — Ulubari",
-    lat: 26.1726,
-    lng: 91.7505,
-    level: "High",
-    radius_m: 300,
-  },
-  {
-    name: "DEMO — Chandmari",
-    lat: 26.1850,
-    lng: 91.7735,
-    level: "High",
-    radius_m: 280,
-  },
-  {
-    name: "DEMO — Zoo Road Tiniali",
-    lat: 26.1744,
-    lng: 91.7815,
-    level: "Very High",
-    radius_m: 300,
-  },
-  {
-    name: "DEMO — Noonmati",
-    lat: 26.1900,
-    lng: 91.7915,
-    level: "High",
-    radius_m: 300,
-  },
-  {
-    name: "DEMO — Narengi",
-    lat: 26.1800,
-    lng: 91.8350,
-    level: "High",
-    radius_m: 300,
-  },
-  {
-    name: "DEMO — Maligaon",
-    lat: 26.1580,
-    lng: 91.6975,
-    level: "Very High",
-    radius_m: 320,
-  },
-  {
-    name: "DEMO — Bharalumukh",
-    lat: 26.1752,
-    lng: 91.7337,
-    level: "High",
-    radius_m: 300,
-  },
-  {
-    name: "DEMO — Jalukbari",
-    lat: 26.1598,
-    lng: 91.6748,
-    level: "High",
-    radius_m: 320,
-  },
-  {
-    name: "DEMO — Lokhra",
-    lat: 26.1105,
-    lng: 91.7485,
-    level: "Very High",
-    radius_m: 300,
-  },
-  {
-    name: "DEMO — Sarusajai",
-    lat: 26.1120,
-    lng: 91.7710,
-    level: "High",
-    radius_m: 280,
   },
 ];
 
@@ -242,24 +101,6 @@ function getRiskColor(risk) {
   if (risk === "High") return "#d76b26";
   if (risk === "Medium") return "#c79a1b";
   return "#2f7b58";
-}
-
-function calculateLiveRisk(baseScore, rainfall24h) {
-  let score = baseScore;
-
-  if (rainfall24h >= 70) score += 25;
-  else if (rainfall24h >= 40) score += 18;
-  else if (rainfall24h >= 20) score += 10;
-  else if (rainfall24h >= 10) score += 5;
-
-  score = Math.min(score, 100);
-
-  let level = "Low";
-  if (score >= 75) level = "Very High";
-  else if (score >= 50) level = "High";
-  else if (score >= 25) level = "Medium";
-
-  return { score, level };
 }
 
 function MapFocus({ place }) {
@@ -447,10 +288,8 @@ function minimumDistanceToRoute(
 
 function scoreRouteCandidate(
   route,
-  rainfall24h,
   reports,
-  riskByName = {},
-  extraHazards = []
+  riskByName = {}
 ) {
   const coordinates =
     route?.geometry?.coordinates ?? [];
@@ -458,115 +297,80 @@ function scoreRouteCandidate(
   let floodPenalty = 0;
   const nearbyRisks = [];
   const nearbyReports = [];
-  const demoFloodIntersections = [];
+  const liveHazardIntersections = [];
 
-  const routeHazards = [
-    ...hotspots.map((place) => ({
-      ...place,
-      demo: false,
-      radius_m: 450,
-    })),
-    ...extraHazards.map((place) => ({
-      ...place,
-      demo: true,
-      radius_m:
-        place.radius_m || 300,
-    })),
-  ];
+  const routeHazards =
+    Object.values(riskByName)
+      .filter(
+        (risk) =>
+          risk &&
+          Number.isFinite(Number(risk.lat)) &&
+          Number.isFinite(Number(risk.lng)) &&
+          (
+            risk.level === "High" ||
+            risk.level === "Very High"
+          )
+      );
 
-  routeHazards.forEach((place) => {
+  routeHazards.forEach((risk) => {
     const distance =
       minimumDistanceToRoute(
-        place.lat,
-        place.lng,
+        Number(risk.lat),
+        Number(risk.lng),
         coordinates
       );
 
-    const influenceRadius =
-      place.demo
-        ? Math.max(
-            420,
-            (place.radius_m || 300) + 180
-          )
-        : 450;
+    const hazardRadius =
+      risk.level === "Very High"
+        ? 500
+        : 400;
 
-    if (distance > influenceRadius) {
+    if (distance > 650) {
       return;
     }
 
-    if (
-      place.demo &&
-      distance <=
-        (place.radius_m || 300)
-    ) {
-      demoFloodIntersections.push({
-        name: place.name,
-        distance,
-        radius_m:
-          place.radius_m || 300,
-      });
-
-      // Hard penalty for physically crossing a
-      // simulated flooded area.
-      floodPenalty += 250;
-    }
-
-    const risk =
-      place.demo
-        ? {
-            level:
-              place.level || "Very High",
-            score:
-              place.level === "High"
-                ? 75
-                : 92,
-          }
-        : (
-            riskByName[place.name] ||
-            calculateLiveRisk(
-              place.baseScore,
-              rainfall24h
-            )
-          );
-
-    const weight =
-      place.demo
-        ? risk.level === "Very High"
-          ? 62
-          : 42
-        : risk.level === "Very High"
-        ? 34
-        : risk.level === "High"
-        ? 22
-        : risk.level === "Medium"
-        ? 10
-        : 3;
-
-    const proximity =
-      Math.max(
-        0,
-        1 -
-          distance /
-            influenceRadius
-      );
-
-    floodPenalty +=
-      weight * proximity;
-
-    if (
-      risk.level === "Very High" ||
-      risk.level === "High"
-    ) {
-      nearbyRisks.push({
-        name: place.name,
+    if (distance <= hazardRadius) {
+      liveHazardIntersections.push({
+        name: risk.name,
         level: risk.level,
         distance,
-        demo: place.demo,
+        radius_m: hazardRadius,
       });
+
+      floodPenalty +=
+        risk.level === "Very High"
+          ? 180
+          : 110;
     }
+
+    const proximity = Math.max(
+      0,
+      1 - distance / 650
+    );
+
+    const weight =
+      risk.level === "Very High"
+        ? 46
+        : 30;
+
+    floodPenalty += weight * proximity;
+
+    nearbyRisks.push({
+      name: risk.name,
+      level: risk.level,
+      distance,
+      live: true,
+    });
   });
 
   reports.forEach((report) => {
+    if (
+      report.verification_status === "rejected" ||
+      report.active === false
+    ) {
+      return;
+    }
+
     const distance =
       minimumDistanceToRoute(
         Number(report.latitude),
@@ -574,33 +378,37 @@ function scoreRouteCandidate(
         coordinates
       );
 
-    if (distance > 220) {
+    if (distance > 240) {
       return;
     }
 
     const weight =
       report.road_status === "blocked"
-        ? 35
+        ? 55
         : report.road_status === "caution"
-        ? 20
-        : 6;
+        ? 28
+        : 8;
 
-    const proximity =
-      Math.max(
-        0,
-        1 - distance / 220
-      );
+    const proximity = Math.max(
+      0,
+      1 - distance / 240
+    );
+
+    const trustWeight =
+      report.verified ||
+      report.verification_status === "verified"
+        ? 1
+        : 0.65;
 
     floodPenalty +=
-      weight * proximity;
+      weight * proximity * trustWeight;
 
     nearbyReports.push({
       id: report.id,
       locality:
-        report.locality ||
-        "Citizen report",
-      roadStatus:
-        report.road_status,
+        report.locality || "Citizen report",
+      roadStatus: report.road_status,
+      verified: Boolean(report.verified),
       distance,
     });
   });
@@ -608,22 +416,17 @@ function scoreRouteCandidate(
   const durationMinutes =
     (route.duration ?? 0) / 60;
 
-  // Lower is better. Travel time remains important,
-  // but flood proximity can make a slightly longer
-  // alternative preferable.
   const blockedReports =
     nearbyReports.filter(
       (item) =>
-        item.roadStatus ===
-        "blocked"
+        item.roadStatus === "blocked"
     ).length;
 
   const safetyCost =
     durationMinutes +
     floodPenalty * 0.8 +
-    blockedReports * 45 +
-    demoFloodIntersections.length *
-      10000;
+    blockedReports * 55 +
+    liveHazardIntersections.length * 2000;
 
   return {
     ...route,
@@ -632,9 +435,9 @@ function scoreRouteCandidate(
       (route.distance ?? 0) / 1000,
     floodPenalty,
     blockedReports,
-    demoFloodIntersections,
-    crossesDemoFlood:
-      demoFloodIntersections.length > 0,
+    liveHazardIntersections,
+    crossesLiveHazard:
+      liveHazardIntersections.length > 0,
     safetyCost,
     nearbyRisks,
     nearbyReports,
@@ -941,8 +744,50 @@ function getTerrainBandClass(band) {
 }
 
 
+
+function getReportFreshness(report) {
+  const age = Number(report?.age_minutes);
+
+  if (!Number.isFinite(age)) {
+    return { label: "Unknown age", className: "stale" };
+  }
+
+  if (age <= 15) {
+    return { label: "Live", className: "live" };
+  }
+
+  if (age <= 120) {
+    return { label: "Recent", className: "recent" };
+  }
+
+  if (age <= 360) {
+    return { label: "Fresh", className: "fresh" };
+  }
+
+  return { label: "Stale", className: "stale" };
+}
+
+function formatReportAge(minutes) {
+  const value = Number(minutes);
+
+  if (!Number.isFinite(value)) return "time unavailable";
+  if (value < 1) return "just now";
+  if (value < 60) return `${Math.round(value)} min ago`;
+
+  const hours = Math.floor(value / 60);
+  const mins = Math.round(value % 60);
+
+  if (hours < 24) {
+    return mins
+      ? `${hours}h ${mins}m ago`
+      : `${hours}h ago`;
+  }
+
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
 function App() {
-  const [selected, setSelected] = useState(hotspots[0]);
+  const [selected, setSelected] = useState(monitoringPoints[0]);
   const [weather, setWeather] = useState(null);
   const [river, setRiver] = useState(null);
   const [radar, setRadar] = useState(null);
@@ -969,6 +814,12 @@ function App() {
 
   const [drainageMode, setDrainageMode] = useState(false);
   const [terrainMode, setTerrainMode] = useState(false);
+  const [reportsMode, setReportsMode] = useState(false);
+  const [adminKey, setAdminKey] = useState(
+    () => sessionStorage.getItem("floodflow_admin_key") || ""
+  );
+  const [reportAdminMessage, setReportAdminMessage] = useState("");
+  const [verifyingReportId, setVerifyingReportId] = useState(null);
   const [assetFilter, setAssetFilter] = useState("all");
 
   const [routeMode, setRouteMode] = useState(false);
@@ -978,16 +829,15 @@ function App() {
   const [routePickingStart, setRoutePickingStart] = useState(false);
 
   const [routePreference, setRoutePreference] = useState("safest");
-  const [demoFloodScenario, setDemoFloodScenario] = useState(false);
   const [sideRoadDetours, setSideRoadDetours] = useState(true);
 
   const [routeDestinationPoint, setRouteDestinationPoint] = useState({
-    lat: hotspots[1].lat,
-    lng: hotspots[1].lng,
+    lat: monitoringPoints[1].lat,
+    lng: monitoringPoints[1].lng,
   });
 
   const [routeDestinationLabel, setRouteDestinationLabel] = useState(
-    hotspots[1].name
+    monitoringPoints[1].name
   );
 
   const [routeSearch, setRouteSearch] = useState("");
@@ -1022,7 +872,10 @@ function App() {
 
   async function loadWeather() {
     try {
-      const data = await getWeather();
+      const data = await getWeather(
+        selected.lat,
+        selected.lng
+      );
       setWeather(data);
     } catch (error) {
       console.error("Weather:", error);
@@ -1097,7 +950,7 @@ function App() {
     try {
       const data =
         await getTerrainSamples(
-          hotspots
+          monitoringPoints
         );
 
       setTerrain(
@@ -1153,17 +1006,11 @@ function App() {
   }
 
   useEffect(() => {
-    loadWeather();
     loadRiver();
     loadRadar();
     loadTerrain();
     loadRisks();
     loadReports();
-
-    const weatherTimer = setInterval(
-      loadWeather,
-      5 * 60 * 1000
-    );
 
     const riverTimer = setInterval(
       loadRiver,
@@ -1177,22 +1024,34 @@ function App() {
 
     const riskTimer = setInterval(
       loadRisks,
-      5 * 60 * 1000
+      2 * 60 * 1000
     );
 
     const reportTimer = setInterval(
       loadReports,
-      30 * 1000
+      20 * 1000
     );
 
     return () => {
-      clearInterval(weatherTimer);
       clearInterval(riverTimer);
       clearInterval(radarTimer);
       clearInterval(riskTimer);
       clearInterval(reportTimer);
     };
   }, []);
+
+  useEffect(() => {
+    setLoadingWeather(true);
+    loadWeather();
+
+    const weatherTimer = setInterval(
+      loadWeather,
+      2 * 60 * 1000
+    );
+
+    return () =>
+      clearInterval(weatherTimer);
+  }, [selected.lat, selected.lng]);
 
   useEffect(() => {
     if (!routeMode) {
@@ -1269,6 +1128,7 @@ function App() {
 
   async function openDrainageMode() {
     setRouteMode(false);
+    setReportsMode(false);
     setTerrainMode(false);
     setDrainageMode(true);
 
@@ -1358,6 +1218,52 @@ function App() {
     }
   }
 
+
+  async function handleReportVerification(
+    reportId,
+    status
+  ) {
+    if (!adminKey.trim()) {
+      setReportAdminMessage(
+        "Enter the verification key first."
+      );
+      return;
+    }
+
+    setVerifyingReportId(reportId);
+    setReportAdminMessage("");
+
+    try {
+      sessionStorage.setItem(
+        "floodflow_admin_key",
+        adminKey.trim()
+      );
+
+      await verifyFloodReport(
+        reportId,
+        status,
+        adminKey.trim()
+      );
+
+      await loadReports();
+      await loadRisks();
+
+      setReportAdminMessage(
+        status === "verified"
+          ? "Report verified."
+          : "Report rejected and removed from active risk use."
+      );
+    } catch (error) {
+      console.error("Report verification:", error);
+      setReportAdminMessage(
+        error?.message ||
+        "Could not update report."
+      );
+    } finally {
+      setVerifyingReportId(null);
+    }
+  }
+
   function getRouteGpsLocation() {
     return new Promise(
       (resolve, reject) => {
@@ -1430,17 +1336,12 @@ function App() {
         );
       }
 
-      const activeDemoHazards =
-        demoFloodScenario
-          ? demoFloodZones
-          : [];
-
       const data =
         await getRouteCandidates(
           startPoint,
           destinationPoint,
           sideRoadDetours
-            ? activeDemoHazards
+            ? liveRouteHazards
             : []
         );
 
@@ -1449,10 +1350,8 @@ function App() {
           .map((route) =>
             scoreRouteCandidate(
               route,
-              rainfall24,
               reports,
-              riskByName,
-              activeDemoHazards
+              riskByName
             )
           );
 
@@ -1500,14 +1399,14 @@ function App() {
             b.durationMinutes
         );
 
-      // Strict flood avoidance:
-      // First reject any route that physically
-      // intersects a simulated flood circle.
+      // Live hazard avoidance:
+      // Prefer routes that do not intersect current
+      // high-risk areas or blocked-road reports.
       let safestPool =
         scored.filter(
           (route) =>
             route
-              .demoFloodIntersections
+              .liveHazardIntersections
               .length === 0 &&
             route.blockedReports === 0
         );
@@ -1517,21 +1416,21 @@ function App() {
           scored.filter(
             (route) =>
               route
-                .demoFloodIntersections
+                .liveHazardIntersections
                 .length === 0
           );
       }
 
-      // If absolutely every drivable candidate crosses
-      // a flood zone, choose the one with the fewest
-      // crossings instead of pretending it is safe.
+      // If every drivable candidate crosses a current
+      // hazard, choose the one with the fewest crossings
+      // instead of claiming the route is hazard-free.
       if (!safestPool.length) {
         const minimumCrossings =
           Math.min(
             ...scored.map(
               (route) =>
                 route
-                  .demoFloodIntersections
+                  .liveHazardIntersections
                   .length
             )
           );
@@ -1540,7 +1439,7 @@ function App() {
           scored.filter(
             (route) =>
               route
-                .demoFloodIntersections
+                .liveHazardIntersections
                 .length ===
               minimumCrossings
           );
@@ -1571,22 +1470,22 @@ function App() {
 
         const selectedCrossings =
           ordered[0]
-            .demoFloodIntersections
+            .liveHazardIntersections
             .length;
 
         const safeCandidates =
           scored.filter(
             (route) =>
               route
-                .demoFloodIntersections
+                .liveHazardIntersections
                 .length === 0
           ).length;
 
         setRouteMessage(
           routePreference === "safest"
             ? selectedCrossings === 0
-              ? `FloodFlow found ${safeCandidates} flood-free candidate${safeCandidates === 1 ? "" : "s"} and selected the safest one.`
-              : `No completely flood-free drivable route was found. Using the route with the fewest flood-zone crossings (${selectedCrossings}).`
+              ? `FloodFlow found ${safeCandidates} candidate${safeCandidates === 1 ? "" : "s"} avoiding current mapped hazards and selected the safest one.`
+              : `Every returned drivable route intersects a current mapped hazard. Using the option with the fewest crossings (${selectedCrossings}).`
             : blockedAvoided
             ? "Fastest option avoided a nearby blocked-road report."
             : `Compared ${scored.length} route option${scored.length === 1 ? "" : "s"} by travel time.`
@@ -1785,7 +1684,7 @@ function App() {
 
   function openRouteMode() {
     const defaultDestination =
-      hotspots.find(
+      monitoringPoints.find(
         (place) =>
           place.name !==
           selected.name
@@ -1804,7 +1703,6 @@ function App() {
     }
 
     setRouteMessage("");
-    setDemoFloodScenario(true);
     setRouteMode(true);
   }
 
@@ -1987,7 +1885,7 @@ function App() {
 
     if (!query) return;
 
-    const match = hotspots.find((place) =>
+    const match = monitoringPoints.find((place) =>
       place.name.toLowerCase().includes(query)
     );
 
@@ -2081,7 +1979,7 @@ function App() {
 
   const hotspotElevations =
     useMemo(() => {
-      return hotspots
+      return monitoringPoints
         .map(
           (place) =>
             terrain[place.name]
@@ -2104,7 +2002,7 @@ function App() {
 
   const terrainRanking =
     useMemo(() => {
-      return hotspots
+      return monitoringPoints
         .map((place) => ({
           ...place,
           terrain:
@@ -2206,6 +2104,51 @@ function App() {
     }, [risks]);
 
 
+  const liveRouteHazards =
+    useMemo(() => {
+      const riskHazards = risks
+        .filter(
+          (risk) =>
+            risk.level === "High" ||
+            risk.level === "Very High"
+        )
+        .map((risk) => ({
+          lat: Number(risk.lat),
+          lng: Number(risk.lng),
+          radius_m:
+            risk.level === "Very High"
+              ? 500
+              : 400,
+          source: "live-risk",
+        }));
+
+      const reportHazards = reports
+        .filter(
+          (report) =>
+            report.active !== false &&
+            report.verification_status !== "rejected" &&
+            (
+              report.road_status === "blocked" ||
+              report.road_status === "caution"
+            )
+        )
+        .map((report) => ({
+          lat: Number(report.latitude),
+          lng: Number(report.longitude),
+          radius_m:
+            report.road_status === "blocked"
+              ? 220
+              : 140,
+          source: "citizen-report",
+        }));
+
+      return [
+        ...riskHazards,
+        ...reportHazards,
+      ];
+    }, [risks, reports]);
+
+
   const routeStartPoint =
     navigationActive &&
     navigationPoint
@@ -2253,34 +2196,44 @@ function App() {
       : null;
 
   const liveSelected =
-    riskByName[selected.name] ||
-    calculateLiveRisk(
-      selected.baseScore,
-      rainfall24
-    );
+    riskByName[selected.name] || null;
 
   const highRiskCount = useMemo(() => {
-    if (risks.length) {
-      return risks.filter(
-        (risk) =>
-          risk.level === "High" ||
-          risk.level === "Very High"
-      ).length;
-    }
+    return risks.filter(
+      (risk) =>
+        risk.level === "High" ||
+        risk.level === "Very High"
+    ).length;
+  }, [risks]);
 
-    return hotspots.filter((location) => {
-      const result =
-        calculateLiveRisk(
-          location.baseScore,
-          rainfall24
-        );
+  const reportStats = useMemo(() => {
+    const visible = reports.filter(
+      (report) =>
+        report.verification_status !== "rejected"
+    );
 
-      return (
-        result.level === "High" ||
-        result.level === "Very High"
-      );
-    }).length;
-  }, [risks, rainfall24]);
+    return {
+      total: visible.length,
+      active: visible.filter(
+        (report) => report.active !== false
+      ).length,
+      verified: visible.filter(
+        (report) =>
+          report.verified ||
+          report.verification_status === "verified"
+      ).length,
+      pending: visible.filter(
+        (report) =>
+          !report.verified &&
+          (report.verification_status || "pending") === "pending"
+      ).length,
+      blocked: visible.filter(
+        (report) =>
+          report.active !== false &&
+          report.road_status === "blocked"
+      ).length,
+    };
+  }, [reports]);
 
   return (
     <div className="app-shell">
@@ -2324,7 +2277,7 @@ function App() {
           />
 
           <datalist id="floodflow-localities">
-            {hotspots.map((place) => (
+            {monitoringPoints.map((place) => (
               <option
                 key={place.name}
                 value={place.name}
@@ -2342,7 +2295,7 @@ function App() {
 
         <div className="topbar-status">
           <span className="source-pill">
-            OPEN-METEO
+            LIVE DATA
           </span>
 
           <span className="live-dot" />
@@ -2364,7 +2317,8 @@ function App() {
             className={`rail-item ${
               !routeMode &&
               !drainageMode &&
-              !terrainMode
+              !terrainMode &&
+              !reportsMode
                 ? "active"
                 : ""
             }`}
@@ -2373,6 +2327,7 @@ function App() {
               setRouteMode(false);
               setDrainageMode(false);
               setTerrainMode(false);
+              setReportsMode(false);
             }}
           >
             <span className="rail-icon">
@@ -2394,6 +2349,7 @@ function App() {
             onClick={() => {
               setDrainageMode(false);
               setTerrainMode(false);
+              setReportsMode(false);
               setShowRiskLayer(
                 (value) => !value
               );
@@ -2410,17 +2366,20 @@ function App() {
 
           <button
             className={`rail-item ${
-              showReportLayer
+              reportsMode
+                ? "active"
+                : showReportLayer
                 ? "selected"
                 : ""
             }`}
             type="button"
             onClick={() => {
+              stopNavigation();
+              setRouteMode(false);
               setDrainageMode(false);
               setTerrainMode(false);
-              setShowReportLayer(
-                (value) => !value
-              );
+              setReportsMode(true);
+              setShowReportLayer(true);
             }}
           >
             <span className="rail-icon">
@@ -2440,6 +2399,7 @@ function App() {
             onClick={() => {
               setDrainageMode(false);
               setTerrainMode(false);
+              setReportsMode(false);
               openRouteMode();
             }}
           >
@@ -2480,6 +2440,7 @@ function App() {
             onClick={() => {
               setRouteMode(false);
               setDrainageMode(false);
+              setReportsMode(false);
               setTerrainMode(true);
               setShowHillshadeLayer(true);
             }}
@@ -2723,7 +2684,7 @@ function App() {
                     positions={positions}
                     pathOptions={{
                       color:
-                        route.crossesDemoFlood
+                        route.crossesLiveHazard
                           ? selectedRoute
                             ? "#a53b32"
                             : "#b96b62"
@@ -2741,7 +2702,7 @@ function App() {
                           ? 0.96
                           : 0.28,
                       dashArray:
-                        route.crossesDemoFlood
+                        route.crossesLiveHazard
                           ? "10 7"
                           : undefined,
                     }}
@@ -2910,65 +2871,16 @@ function App() {
               />
             )}
 
-
-          {/* DEMO FLOOD STRESS-TEST ZONES */}
-          {routeMode &&
-            demoFloodScenario &&
-            demoFloodZones.map(
-              (zone) => (
-                <Circle
-                  key={zone.name}
-                  center={[
-                    zone.lat,
-                    zone.lng,
-                  ]}
-                  radius={zone.radius_m}
-                  pathOptions={{
-                    color:
-                      zone.level === "Very High"
-                        ? "#a92f2b"
-                        : "#c96727",
-                    fillColor:
-                      zone.level === "Very High"
-                        ? "#c54338"
-                        : "#df7a2b",
-                    fillOpacity: 0.24,
-                    weight: 2,
-                    dashArray: "7 5",
-                  }}
-                >
-                  <Popup>
-                    <div className="map-popup demo-flood-popup">
-                      <strong>
-                        {zone.name}
-                      </strong>
-
-                      <span>
-                        {zone.level}
-                        {" "}simulated flood zone
-                      </span>
-
-                      <small>
-                        DEMO ONLY — used to
-                        stress-test safer routing.
-                      </small>
-                    </div>
-                  </Popup>
-                </Circle>
-              )
-            )}
-
-
-          {/* RISK MARKERS */}
+          {/* LIVE DERIVED RISK MARKERS */}
           {showRiskLayer &&
-            hotspots.map((place) => {
+            monitoringPoints.map((place) => {
 
               const liveRisk =
-                riskByName[place.name] ||
-                calculateLiveRisk(
-                  place.baseScore,
-                  rainfall24
-                );
+                riskByName[place.name];
+
+              if (!liveRisk) {
+                return null;
+              }
 
               return (
                 <CircleMarker
@@ -3034,7 +2946,12 @@ function App() {
 
           {/* CITIZEN REPORT MARKERS */}
           {showReportLayer &&
-            reports.map((report) => (
+            reports
+              .filter(
+                (report) =>
+                  report.verification_status !== "rejected"
+              )
+              .map((report) => (
               <CircleMarker
                 key={`report-${report.id}`}
                 center={[
@@ -3048,10 +2965,18 @@ function App() {
                 }
                 pathOptions={{
                   color: "#ffffff",
-                  fillColor: "#287c95",
+                  fillColor:
+                    report.active === false
+                      ? "#75808a"
+                      : report.verified ||
+                        report.verification_status === "verified"
+                      ? "#16866f"
+                      : "#287c95",
                   fillOpacity:
                     drainageMode
                       ? 0.42
+                      : report.active === false
+                      ? 0.55
                       : 0.95,
                   weight: 2,
                 }}
@@ -3079,9 +3004,21 @@ function App() {
 
                     <span>
                       {report.verified
-                        ? "Verified"
-                        : "Unverified"}
+                        ? "Verified observation"
+                        : "Pending verification"}
                     </span>
+
+                    <span>
+                      {getReportFreshness(report).label}
+                      {" · "}
+                      {formatReportAge(report.age_minutes)}
+                    </span>
+
+                    {report.note && (
+                      <span>
+                        {report.note}
+                      </span>
+                    )}
 
                   </div>
                 </Popup>
@@ -3106,7 +3043,7 @@ function App() {
           <p>
             {drainageMode
               ? "Mapped storm drains, ditches and canals"
-              : "Historical vulnerability + live rainfall input"}
+              : "Live weather + terrain + trusted ground reports"}
           </p>
         </div>
 
@@ -3448,31 +3385,6 @@ function App() {
                 <label>
                   <input
                     type="checkbox"
-                    checked={demoFloodScenario}
-                    onChange={(event) => {
-                      setDemoFloodScenario(
-                        event.target.checked
-                      );
-
-                      setRouteOptions([]);
-                      setChosenRoute(null);
-                    }}
-                  />
-
-                  <span>
-                    Demo flood stress test
-                  </span>
-
-                  <small>
-                    {demoFloodScenario
-                      ? `${demoFloodZones.length} simulated zones`
-                      : "off"}
-                  </small>
-                </label>
-
-                <label>
-                  <input
-                    type="checkbox"
                     checked={sideRoadDetours}
                     onChange={(event) => {
                       setSideRoadDetours(
@@ -3485,32 +3397,15 @@ function App() {
                   />
 
                   <span>
-                    Explore side-road detours
+                    Avoid live flood hazards
                   </span>
 
                   <small>
-                    residential / service roads
+                    {liveRouteHazards.length} current hazard input{liveRouteHazards.length === 1 ? "" : "s"}
                   </small>
                 </label>
 
               </div>
-
-
-              {demoFloodScenario && (
-                <div className="demo-route-warning">
-                  <strong>
-                    SIMULATION
-                  </strong>
-
-                  <span>
-                    Extra flooded areas are synthetic
-                    and exist only to test whether
-                    FloodFlow can find smaller-road
-                    detours. They are not current
-                    flood observations.
-                  </span>
-                </div>
-              )}
 
 
               <label className="route-field">
@@ -3728,7 +3623,7 @@ function App() {
 
               <div className="route-quick-places">
 
-                {hotspots
+                {monitoringPoints
                   .slice(0, 6)
                   .map(
                     (place) => (
@@ -3995,17 +3890,17 @@ function App() {
                                 <span
                                   className={
                                     route
-                                      .demoFloodIntersections
+                                      .liveHazardIntersections
                                       .length
                                       ? "route-crossing-warning"
                                       : "route-clear-status"
                                   }
                                 >
                                   {route
-                                    .demoFloodIntersections
+                                    .liveHazardIntersections
                                     .length
-                                    ? `Crosses ${route.demoFloodIntersections.length} demo flood zone${route.demoFloodIntersections.length === 1 ? "" : "s"}`
-                                    : "Avoids demo flood zones"}
+                                    ? `Crosses ${route.liveHazardIntersections.length} live flood-risk zone${route.liveHazardIntersections.length === 1 ? "" : "s"}`
+                                    : "Avoids current mapped hazards"}
                                 </span>
                               </div>
 
@@ -4154,13 +4049,13 @@ function App() {
 
                     <div>
                       <span>
-                        Flood zones crossed
+                        Live hazards crossed
                       </span>
 
                       <strong
                         className={
                           chosenRoute
-                            .demoFloodIntersections
+                            .liveHazardIntersections
                             .length
                             ? "danger-number"
                             : "safe-number"
@@ -4168,7 +4063,7 @@ function App() {
                       >
                         {
                           chosenRoute
-                            .demoFloodIntersections
+                            .liveHazardIntersections
                             .length
                         }
                       </strong>
@@ -4224,12 +4119,223 @@ function App() {
             <div className="route-source-note">
               Road routing: OSRM / OpenStreetMap.
               Search: OSM Nominatim. Flood exposure
-              ranking: FloodFlow. When the demo stress
-              test is enabled, extra synthetic flood
-              zones and side-road detour candidates
-              are used only for testing. No Google
-              traffic or official emergency-routing
-              feed is used.
+              ranking uses current Open-Meteo model
+              rainfall, terrain and recent trusted
+              FloodFlow reports. No synthetic flood
+              zones are used. This is not an official
+              emergency-routing feed.
+            </div>
+
+          </div>
+
+        ) : reportsMode ? (
+
+          <div className="reports-intel-panel">
+
+            <div className="panel-heading">
+              <div>
+                <span className="eyebrow">
+                  TRUSTED GROUND REPORTS
+                </span>
+                <h2>
+                  Report operations
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                className="panel-report-button"
+                onClick={() => setReportsMode(false)}
+              >
+                MAP
+              </button>
+            </div>
+
+            <div className="reports-mode-note">
+              <span className="model-tag">
+                CROWD + VERIFY
+              </span>
+              Citizen observations are time-limited and
+              kept separate from official/model data.
+              Verified reports receive greater weight in
+              FloodFlow risk and routing.
+            </div>
+
+            <section className="panel-section">
+              <div className="reports-kpi-grid">
+                <div>
+                  <span>Active ≤ 6h</span>
+                  <strong>{reportStats.active}</strong>
+                </div>
+                <div>
+                  <span>Verified</span>
+                  <strong>{reportStats.verified}</strong>
+                </div>
+                <div>
+                  <span>Pending</span>
+                  <strong>{reportStats.pending}</strong>
+                </div>
+                <div>
+                  <span>Blocked road</span>
+                  <strong>{reportStats.blocked}</strong>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="submit-report reports-new-button"
+                onClick={() => setShowReport(true)}
+              >
+                + Add ground report
+              </button>
+            </section>
+
+            <section className="panel-section">
+              <div className="section-title">
+                <h3>Verification console</h3>
+                <span>prototype admin</span>
+              </div>
+
+              <label className="admin-key-field">
+                Verification key
+                <input
+                  type="password"
+                  value={adminKey}
+                  placeholder="Configured on backend"
+                  onChange={(event) => {
+                    setAdminKey(event.target.value);
+                    setReportAdminMessage("");
+                  }}
+                />
+              </label>
+
+              {reportAdminMessage && (
+                <div className="report-admin-message">
+                  {reportAdminMessage}
+                </div>
+              )}
+
+              <p className="reports-admin-help">
+                The key is stored only for this browser
+                session. In production this should become
+                authenticated authority/admin accounts.
+              </p>
+            </section>
+
+            <section className="panel-section">
+              <div className="section-title">
+                <h3>Latest observations</h3>
+                <span>{reportStats.total} shown</span>
+              </div>
+
+              <div className="report-ops-list">
+                {reports
+                  .filter(
+                    (report) =>
+                      report.verification_status !== "rejected"
+                  )
+                  .slice(0, 30)
+                  .map((report) => {
+                    const freshness =
+                      getReportFreshness(report);
+                    const status =
+                      report.verification_status ||
+                      (report.verified ? "verified" : "pending");
+
+                    return (
+                      <article
+                        key={`ops-${report.id}`}
+                        className={`report-ops-card ${
+                          report.active === false ? "stale" : ""
+                        }`}
+                      >
+                        <div className="report-ops-heading">
+                          <div>
+                            <strong>
+                              {report.locality || "Unnamed location"}
+                            </strong>
+                            <span>
+                              {formatReportAge(report.age_minutes)}
+                            </span>
+                          </div>
+
+                          <div className="report-badges">
+                            <span
+                              className={`freshness-badge ${freshness.className}`}
+                            >
+                              {freshness.label}
+                            </span>
+                            <span
+                              className={`verification-badge ${status}`}
+                            >
+                              {status}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="report-ops-metrics">
+                          <span>
+                            {formatNumber(report.water_depth_cm, 0)} cm water
+                          </span>
+                          <span className={`road-state ${report.road_status}`}>
+                            {report.road_status}
+                          </span>
+                        </div>
+
+                        {report.note && (
+                          <p>{report.note}</p>
+                        )}
+
+                        {status === "pending" && (
+                          <div className="report-review-actions">
+                            <button
+                              type="button"
+                              disabled={verifyingReportId === report.id}
+                              onClick={() =>
+                                handleReportVerification(
+                                  report.id,
+                                  "verified"
+                                )
+                              }
+                            >
+                              ✓ Verify
+                            </button>
+                            <button
+                              type="button"
+                              className="reject"
+                              disabled={verifyingReportId === report.id}
+                              onClick={() =>
+                                handleReportVerification(
+                                  report.id,
+                                  "rejected"
+                                )
+                              }
+                            >
+                              × Reject
+                            </button>
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })}
+
+                {!reports.length && (
+                  <div className="data-quality-box">
+                    <strong>No citizen reports yet</strong>
+                    <span>
+                      Submit a ground observation to test
+                      the verification workflow.
+                    </span>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <div className="route-source-note">
+              Reports older than 6 hours remain visible as
+              history but are excluded from active routing
+              and risk influence. Rejected reports are not
+              shown on the public map.
             </div>
 
           </div>
@@ -4875,7 +4981,7 @@ function App() {
                   FloodFlow will later combine
                   DEM-derived slope / flow with
                   rainfall, drainage and
-                  historical flood evidence.
+                  trusted ground observations.
                 </li>
 
               </ul>
@@ -4954,7 +5060,7 @@ function App() {
                   </span>
 
                   <strong>
-                    {liveSelected.score}
+                    {liveSelected?.score ?? "—"}
                   </strong>
 
                   <small>
@@ -4966,16 +5072,20 @@ function App() {
                   className="risk-label"
                   style={{
                     color:
-                      getRiskColor(
-                        liveSelected.level
-                      ),
+                      liveSelected
+                        ? getRiskColor(
+                            liveSelected.level
+                          )
+                        : "#7b878e",
                     borderColor:
-                      getRiskColor(
-                        liveSelected.level
-                      ),
+                      liveSelected
+                        ? getRiskColor(
+                            liveSelected.level
+                          )
+                        : "#7b878e",
                   }}
                 >
-                  {liveSelected.level}
+                  {liveSelected?.level || "Waiting"}
                 </span>
 
               </div>
@@ -4987,9 +5097,9 @@ function App() {
                   MODEL
                 </span>
 
-                {riskByName[selected.name]
-                  ? "Explainable backend risk index — not an official flood warning."
-                  : "Fallback prototype risk index — backend risk engine unavailable."}
+                Live derived index from Open-Meteo weather,
+                Copernicus DEM and recent trusted reports —
+                not an official flood warning.
 
               </div>
 
@@ -5088,15 +5198,14 @@ function App() {
                     {selected.basin}
                   </dd>
                 </div>
-
                 <div>
                   <dt>
-                    Historical planning exposure
+                    Recent reports nearby
                   </dt>
 
                   <dd>
-                    {selected.populationRisk
-                      .toLocaleString("en-IN")}
+                    {liveSelected?.inputs
+                      ?.recent_reports_6h ?? 0}
                   </dd>
                 </div>
 
@@ -5147,7 +5256,7 @@ function App() {
                   </dt>
 
                   <dd>
-                    {reports.length}
+                    {reportStats.active}
                   </dd>
                 </div>
 
@@ -5304,56 +5413,47 @@ function App() {
                 Risk factors
               </h3>
 
-              {riskByName[selected.name] ? (
+              {liveSelected ? (
 
                 <div className="risk-breakdown">
 
                   <div>
                     <span>
-                      Historical prior
+                      Rain / 24 h score
                     </span>
                     <strong>
-                      {liveSelected.components
-                        ?.historical_prior ?? "—"}
+                      +{liveSelected.components
+                        ?.rainfall_24h_score ?? 0}
                     </strong>
                   </div>
 
                   <div>
                     <span>
-                      Rainfall modifier
+                      Current rain score
                     </span>
                     <strong>
-                      {liveSelected.components
-                        ?.rainfall_modifier >= 0
-                        ? "+"
-                        : ""}
-                      {liveSelected.components
-                        ?.rainfall_modifier ?? 0}
+                      +{liveSelected.components
+                        ?.current_rain_score ?? 0}
                     </strong>
                   </div>
 
                   <div>
                     <span>
-                      Terrain modifier
+                      Terrain susceptibility
                     </span>
                     <strong>
-                      {liveSelected.components
-                        ?.terrain_modifier >= 0
-                        ? "+"
-                        : ""}
-                      {liveSelected.components
-                        ?.terrain_modifier ?? 0}
+                      +{liveSelected.components
+                        ?.terrain_score ?? 0}
                     </strong>
                   </div>
 
                   <div>
                     <span>
-                      Citizen modifier
+                      Recent report score
                     </span>
                     <strong>
-                      +
-                      {liveSelected.components
-                        ?.citizen_modifier ?? 0}
+                      +{liveSelected.components
+                        ?.citizen_report_score ?? 0}
                     </strong>
                   </div>
 
@@ -5362,7 +5462,7 @@ function App() {
                       Drainage condition
                     </span>
                     <strong className="not-scored">
-                      Not scored
+                      No live sensor feed
                     </strong>
                   </div>
 
@@ -5372,26 +5472,17 @@ function App() {
 
                 <ul className="factor-list">
                   <li>
-                    Historical flood vulnerability
-                  </li>
-                  <li>
-                    Live rainfall contribution:
-                    {" "}
-                    {formatNumber(
-                      rainfall24,
-                      1
-                    )}
-                    {" "}mm / 24 h
+                    Waiting for live risk inputs from the backend.
                   </li>
                 </ul>
 
               )}
 
-              {riskByName[selected.name]
+              {liveSelected
                 ?.reasons?.length > 0 && (
 
                 <ul className="risk-reasons">
-                  {riskByName[selected.name]
+                  {liveSelected
                     .reasons.map(
                       (reason) => (
                         <li key={reason}>
